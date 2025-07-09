@@ -2,7 +2,7 @@
 
 A secure, accessible visual wireframe builder designed to bridge the gap between content writers and developers, specifically for higher education landing pages. This tool helps writers understand how their content fits within responsive layouts before development begins.
 
-![Wireframe Builder](https://img.shields.io/badge/version-1.1.0-blue.svg)
+![Wireframe Builder](https://img.shields.io/badge/version-1.1.2-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Security](https://img.shields.io/badge/security-hardened-green.svg)
 
@@ -44,6 +44,8 @@ Content writers often struggle to visualize how their copy will appear in respon
 - **Dark/Light Themes**: Toggle between color variants
 - **Duplicate Sections**: Quick copy functionality
 - **Undo/Redo**: Full history support with keyboard shortcuts (Ctrl/Cmd+Z)
+- **Sidebar Toggle**: Hide the section library for distraction-free preview
+- **Full-Width Preview**: Sections display edge-to-edge like real landing pages
 - **Export Options**: 
   - High-quality PNG images
   - JSON data for version control
@@ -87,10 +89,11 @@ Content writers often struggle to visualize how their copy will appear in respon
 ### Writing Guidelines
 The tool provides real-time guidance for optimal content length:
 
-- **Headlines**: 6-10 words (50 characters ideal)
-- **Body Text**: 2-3 sentences (150 characters ideal)  
-- **CTAs**: 2-3 words (12 characters ideal)
+- **Headlines**: 6-12 words (45 characters ideal, 70 max)
+- **Body Text**: 50-75 words (400 characters ideal, 600 max) - includes word count display
+- **CTAs**: 2-5 words (15 characters ideal, 25 max)
 - **Form Labels**: Standard labels (15 characters ideal)
+- **Testimonials**: 20-30 words for short, 2-3 sentences for featured
 
 ### Exporting Your Work
 - **Export as Image**: Creates a high-quality PNG for presentations
@@ -165,6 +168,18 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Security hardening and accessibility improvements in v1.1.0
 
 ## 📋 Changelog
+
+### Version 1.1.2 (2025-07-09)
+- 🎨 Removed padding from canvas for full-width section preview
+- 📐 Removed border radius from first/last sections for authentic landing page look
+- 👁️ Added sidebar toggle to preview layouts without distractions
+- 🖼️ Improved visual accuracy for landing page creation
+
+### Version 1.1.1 (2025-07-09)
+- 📝 Updated character limits to align with landing page best practices
+- 📊 Added word count display for body content sections
+- 🎯 Improved content guidelines for better conversion optimization
+- ✏️ Adjusted ideal character counts for headlines, CTAs, and testimonials
 
 ### Version 1.1.0 (2025-07-09)
 - 🔒 Added XSS protection and HTML sanitization

@@ -39,6 +39,8 @@
     const deleteAllBtn = document.getElementById('deleteAllBtn');
     const undoBtn = document.getElementById('undoBtn');
     const redoBtn = document.getElementById('redoBtn');
+    const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+    const sidebar = document.querySelector('.sidebar');
 
     // Section templates with secure rendering
     const sectionTemplates = {
@@ -605,6 +607,17 @@
         undoBtn.addEventListener('click', undo);
         redoBtn.addEventListener('click', redo);
         
+        // Toggle sidebar
+        toggleSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            toggleSidebarBtn.classList.toggle('active');
+            
+            // Update toggle button aria-label
+            const isHidden = sidebar.classList.contains('hidden');
+            toggleSidebarBtn.setAttribute('aria-label', isHidden ? 'Show sidebar' : 'Hide sidebar');
+            toggleSidebarBtn.setAttribute('aria-expanded', !isHidden);
+        });
+        
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
@@ -885,7 +898,7 @@
         }
     }
 
-    // Writing guidelines (unchanged but with proper encapsulation)
+    // Writing guidelines (updated with corrected character limits)
     const writingGuidelines = {
         'eyebrow': {
             maxChars: 35,
@@ -899,9 +912,9 @@
         },
         'section-title': {
             maxChars: 70,
-            idealChars: 50,
+            idealChars: 45, // CHANGED from 50 to 45
             tips: [
-                'Headlines work best at 6-10 words',
+                'Headlines work best at 6-12 words (35-70 characters)',
                 'Front-load with key benefit or outcome',
                 'Use power words that evoke emotion',
                 'Make it specific to your audience'
@@ -918,18 +931,18 @@
             ]
         },
         'body-content': {
-            maxChars: 250,
-            idealChars: 150,
+            maxChars: 600, // CHANGED from 250 to 600
+            idealChars: 400, // CHANGED from 150 to 400
             tips: [
-                'Limit to 2-3 concise sentences',
+                'Limit to 50-75 words for best readability',
                 'Lead with most compelling benefit',
                 'Use simple, conversational language',
                 'Each sentence should add new value'
             ]
         },
         'cta-button': {
-            maxChars: 20,
-            idealChars: 12,
+            maxChars: 25, // CHANGED from 20 to 25
+            idealChars: 15, // CHANGED from 12 to 15
             tips: [
                 'Best CTAs are 2-3 words',
                 'Start with action verb',
@@ -1008,18 +1021,18 @@
             ]
         },
         'form-description': {
-            maxChars: 100,
-            idealChars: 75,
+            maxChars: 140, // CHANGED from 100 to 140
+            idealChars: 100, // CHANGED from 75 to 100
             tips: [
-                'Set expectations clearly',
-                'Mention response time',
-                'Keep to one sentence',
-                'Build trust with privacy note'
+                'Set clear expectations about next steps',
+                'Mention response time to build trust',
+                'Keep to one compelling sentence',
+                'Consider privacy reassurance'
             ]
         },
         'testimonial-quote': {
-            maxChars: 180,
-            idealChars: 140,
+            maxChars: 200, // CHANGED from 180 to 200
+            idealChars: 150, // CHANGED from 140 to 150
             tips: [
                 'Best testimonials are 20-30 words',
                 'Include specific outcome or transformation',
@@ -1028,8 +1041,8 @@
             ]
         },
         'testimonial-quote-large': {
-            maxChars: 280,
-            idealChars: 200,
+            maxChars: 350, // CHANGED from 280 to 350
+            idealChars: 250, // CHANGED from 200 to 250
             tips: [
                 'Tell mini success story in 2-3 sentences',
                 'Include before/after transformation',
@@ -1130,14 +1143,28 @@
             const currentLength = element.textContent.trim().length;
             const status = getCharCountStatus(currentLength, guidelines.idealChars, guidelines.maxChars);
             
-            html += `
-                <div class="guidance-tip ${status}">
-                    <strong>Character Count:</strong> ${currentLength} / ${guidelines.idealChars} ideal
-                    <div class="char-count ${status}">
-                        Max recommended: ${guidelines.maxChars}
+            // Special handling for body-content to show word count
+            if (element.classList.contains('body-content')) {
+                const wordCount = element.textContent.trim().split(/\s+/).filter(word => word.length > 0).length;
+                html += `
+                    <div class="guidance-tip ${status}">
+                        <strong>Character Count:</strong> ${currentLength} / ${guidelines.idealChars} ideal
+                        <div class="char-count ${status}">
+                            Max recommended: ${guidelines.maxChars} characters
+                        </div>
+                        <strong>Word Count:</strong> ${wordCount} / 50-75 ideal
                     </div>
-                </div>
-            `;
+                `;
+            } else {
+                html += `
+                    <div class="guidance-tip ${status}">
+                        <strong>Character Count:</strong> ${currentLength} / ${guidelines.idealChars} ideal
+                        <div class="char-count ${status}">
+                            Max recommended: ${guidelines.maxChars}
+                        </div>
+                    </div>
+                `;
+            }
         }
         
         if (guidelines.tips && guidelines.tips.length > 0) {
@@ -1194,7 +1221,13 @@
             }
         }
         
-        if (guideline?.maxChars) {
+        // Special handling for body-content to show word count
+        if (element.classList.contains('body-content')) {
+            const wordCount = element.textContent.trim().split(/\s+/).filter(word => word.length > 0).length;
+            const status = getCharCountStatus(length, guideline.idealChars, guideline.maxChars);
+            counter.textContent = `${length} chars / ${wordCount} words (50-75 ideal)`;
+            counter.className = `char-indicator ${status}`;
+        } else if (guideline?.maxChars) {
             const status = getCharCountStatus(length, guideline.idealChars, guideline.maxChars);
             counter.textContent = `${length} / ${guideline.idealChars}`;
             counter.className = `char-indicator ${status}`;
@@ -1258,12 +1291,25 @@
                 const status = getCharCountStatus(currentLength, guidelines.idealChars, guidelines.maxChars);
                 const parentDiv = charCountDiv.parentElement;
                 parentDiv.className = `guidance-tip ${status}`;
-                parentDiv.innerHTML = `
-                    <strong>Character Count:</strong> ${currentLength} / ${guidelines.idealChars} ideal
-                    <div class="char-count ${status}">
-                        Max recommended: ${guidelines.maxChars}
-                    </div>
-                `;
+                
+                // Special handling for body-content to show word count
+                if (element.classList.contains('body-content')) {
+                    const wordCount = element.textContent.trim().split(/\s+/).filter(word => word.length > 0).length;
+                    parentDiv.innerHTML = `
+                        <strong>Character Count:</strong> ${currentLength} / ${guidelines.idealChars} ideal
+                        <div class="char-count ${status}">
+                            Max recommended: ${guidelines.maxChars} characters
+                        </div>
+                        <strong>Word Count:</strong> ${wordCount} / 50-75 ideal
+                    `;
+                } else {
+                    parentDiv.innerHTML = `
+                        <strong>Character Count:</strong> ${currentLength} / ${guidelines.idealChars} ideal
+                        <div class="char-count ${status}">
+                            Max recommended: ${guidelines.maxChars}
+                        </div>
+                    `;
+                }
             }
         }
     }
