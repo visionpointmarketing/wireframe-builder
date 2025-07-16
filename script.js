@@ -943,9 +943,19 @@
     
     /* Google Apps Script Code to deploy (paste this at script.google.com):
     
-    function doPost(e) {
+    function doGet(e) {
         try {
-            const data = JSON.parse(e.postData.contents);
+            // Get data from URL parameter
+            const encodedData = e.parameter.data;
+            if (!encodedData) {
+                throw new Error('No data provided');
+            }
+            
+            // Decode the data
+            const jsonString = decodeURIComponent(Utilities.newBlob(Utilities.base64Decode(encodedData)).getDataAsString());
+            const data = JSON.parse(jsonString);
+            
+            // Create the document
             const doc = DocumentApp.create(data.title);
             const body = doc.getBody();
             
@@ -978,25 +988,39 @@
                 body.appendParagraph('');
             });
             
-            // Get the URL
-            const url = doc.getUrl();
+            // Share the document with anyone who has the link
+            doc.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
             
-            // Return success response
-            return ContentService
-                .createTextOutput(JSON.stringify({ success: true, documentUrl: url }))
-                .setMimeType(ContentService.MimeType.JSON);
-                
+            // Get the URL and redirect to it
+            const docUrl = doc.getUrl();
+            
+            // Return an HTML page that redirects to the document
+            return HtmlService.createHtmlOutput(`
+                <html>
+                    <head>
+                        <title>Creating Document...</title>
+                        <meta http-equiv="refresh" content="0; url=${docUrl}">
+                    </head>
+                    <body>
+                        <p>Creating your document... If you're not redirected, <a href="${docUrl}">click here</a>.</p>
+                        <script>window.location.href = "${docUrl}";</script>
+                    </body>
+                </html>
+            `);
+            
         } catch (error) {
-            return ContentService
-                .createTextOutput(JSON.stringify({ success: false, error: error.toString() }))
-                .setMimeType(ContentService.MimeType.JSON);
+            // Return error page
+            return HtmlService.createHtmlOutput(`
+                <html>
+                    <head><title>Error</title></head>
+                    <body>
+                        <h1>Error Creating Document</h1>
+                        <p>${error.toString()}</p>
+                        <p><button onclick="window.close()">Close Window</button></p>
+                    </body>
+                </html>
+            `);
         }
-    }
-    
-    function doGet(e) {
-        return ContentService
-            .createTextOutput(JSON.stringify({ error: "Please use POST method" }))
-            .setMimeType(ContentService.MimeType.JSON);
     }
     */
 
@@ -1010,20 +1034,22 @@
                 saveContentFromEditable();
                 const docData = this.convertWireframeToDocFormat(state.sections);
                 
-                const response = await fetch(this.SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(docData)
-                });
+                // Convert data to base64 to pass as URL parameter
+                const encodedData = btoa(encodeURIComponent(JSON.stringify(docData)));
                 
-                const result = await response.json();
+                // Use GET request with data as parameter (avoids CORS issues)
+                const url = `${this.SCRIPT_URL}?data=${encodedData}`;
                 
-                if (result.success) {
-                    alert('Document created successfully! Opening in new tab...');
-                    window.open(result.documentUrl, '_blank');
-                } else {
-                    throw new Error(result.error);
+                // Open in new window/tab - this bypasses CORS completely
+                const newWindow = window.open(url, '_blank');
+                
+                if (!newWindow) {
+                    throw new Error('Popup blocked. Please allow popups for this site.');
                 }
+                
+                // Show success message
+                alert('Creating Google Doc... The document will open in a new tab.');
+                
             } catch (error) {
                 console.error('Export error:', error);
                 alert('Error exporting to Google Docs: ' + error.message);
