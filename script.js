@@ -608,6 +608,7 @@
         setupEventListeners();
         initializeGuidance();
         initializeDragAndDrop();
+        addGoogleDocsExportButton();
         updateCanvas(false);
         saveToHistory();
     });
@@ -934,6 +935,269 @@
             exportImageBtn.disabled = false;
             exportImageBtn.textContent = 'Export as Image';
         }
+    }
+
+    // Google Docs Export functionality
+    // Replace YOUR_SCRIPT_ID with the actual deployed Apps Script ID
+    const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/a/macros/visionpointmarketing.com/s/AKfycbxfYTH9X-jQkI0Pq8p75U7g6avUSDZz9EOUovQm69xH0JRDD2Uc8zx9sAH7JH7UzIRl/exec';
+    
+    /* Google Apps Script Code to deploy (paste this at script.google.com):
+    
+    function doPost(e) {
+        try {
+            const data = JSON.parse(e.postData.contents);
+            const doc = DocumentApp.create(data.title);
+            const body = doc.getBody();
+            
+            // Add title
+            const title = body.appendParagraph(data.title);
+            title.setHeading(DocumentApp.ParagraphHeading.HEADING1);
+            
+            // Add timestamp
+            body.appendParagraph('Generated: ' + new Date().toLocaleString());
+            body.appendParagraph('');
+            
+            // Add sections
+            data.content.forEach((section, index) => {
+                // Section header
+                const sectionTitle = body.appendParagraph(`Section ${index + 1}: ${section.type}`);
+                sectionTitle.setHeading(DocumentApp.ParagraphHeading.HEADING2);
+                body.appendParagraph(`Theme: ${section.variant}`);
+                body.appendParagraph('');
+                
+                // Section content
+                section.content.forEach(item => {
+                    if (item.value) {
+                        const para = body.appendParagraph(`${item.label}: ${item.value}`);
+                        para.setIndentFirstLine(20);
+                    }
+                });
+                
+                body.appendParagraph('');
+                body.appendParagraph('---');
+                body.appendParagraph('');
+            });
+            
+            // Get the URL
+            const url = doc.getUrl();
+            
+            // Return success response
+            return ContentService
+                .createTextOutput(JSON.stringify({ success: true, documentUrl: url }))
+                .setMimeType(ContentService.MimeType.JSON);
+                
+        } catch (error) {
+            return ContentService
+                .createTextOutput(JSON.stringify({ success: false, error: error.toString() }))
+                .setMimeType(ContentService.MimeType.JSON);
+        }
+    }
+    
+    function doGet(e) {
+        return ContentService
+            .createTextOutput(JSON.stringify({ error: "Please use POST method" }))
+            .setMimeType(ContentService.MimeType.JSON);
+    }
+    */
+
+    class GoogleDocsExporter {
+        constructor() {
+            this.SCRIPT_URL = GOOGLE_APPS_SCRIPT_URL;
+        }
+        
+        async exportToGoogleDocs() {
+            try {
+                saveContentFromEditable();
+                const docData = this.convertWireframeToDocFormat(state.sections);
+                
+                const response = await fetch(this.SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(docData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Document created successfully! Opening in new tab...');
+                    window.open(result.documentUrl, '_blank');
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Error exporting to Google Docs: ' + error.message);
+            }
+        }
+        
+        convertWireframeToDocFormat(sections) {
+            const timestamp = new Date().toLocaleString();
+            const viewportInfo = `Viewport: ${state.currentViewport}`;
+            
+            return {
+                title: `Landing Page Wireframe - ${new Date().toLocaleDateString()}`,
+                content: sections.map(section => this.formatSectionContent(section))
+            };
+        }
+        
+        formatSectionContent(section) {
+            const type = section.type;
+            const content = section.content || {};
+            
+            switch (type) {
+                case 'content-cta':
+                    return {
+                        type: 'Content + CTA',
+                        variant: section.variant,
+                        content: [
+                            { label: 'Eyebrow', value: content.eyebrow || '' },
+                            { label: 'Title', value: content.title || '' },
+                            { label: 'Body', value: content.body || '' },
+                            { label: 'CTA Text', value: content.ctaText || '' }
+                        ]
+                    };
+                    
+                case 'image-content':
+                    return {
+                        type: 'Image + Content',
+                        variant: section.variant,
+                        content: [
+                            { label: 'Eyebrow', value: content.eyebrow || '' },
+                            { label: 'Title', value: content.title || '' },
+                            { label: 'Body', value: content.body || '' },
+                            { label: 'CTA Text', value: content.ctaText || '' }
+                        ]
+                    };
+                    
+                case 'three-column':
+                    return {
+                        type: 'Three Column Features',
+                        variant: section.variant,
+                        content: [
+                            { label: 'Eyebrow', value: content.eyebrow || '' },
+                            { label: 'Title', value: content.title || '' },
+                            { label: 'Subtitle', value: content.subtitle || '' },
+                            ...(content.columns || []).map((col, i) => ({
+                                label: `Column ${i + 1}`,
+                                value: `Title: ${col.title}\nDescription: ${col.description}`
+                            })),
+                            { label: 'CTA Text', value: content.ctaText || '' }
+                        ]
+                    };
+                    
+                case 'statistics':
+                    return {
+                        type: 'Statistics/Numbers',
+                        variant: section.variant,
+                        content: [
+                            { label: 'Eyebrow', value: content.eyebrow || '' },
+                            { label: 'Title', value: content.title || '' },
+                            { label: 'Subtitle', value: content.subtitle || '' },
+                            ...(content.stats || []).map((stat, i) => ({
+                                label: `Stat ${i + 1}`,
+                                value: `${stat.number} - ${stat.label}`
+                            })),
+                            { label: 'CTA Text', value: content.ctaText || '' }
+                        ]
+                    };
+                    
+                case 'program-cards':
+                    return {
+                        type: 'Program Cards',
+                        variant: section.variant,
+                        content: [
+                            { label: 'Eyebrow', value: content.eyebrow || '' },
+                            { label: 'Title', value: content.title || '' },
+                            { label: 'Subtitle', value: content.subtitle || '' },
+                            ...(content.programs || []).map((prog, i) => ({
+                                label: `Program ${i + 1}`,
+                                value: `Title: ${prog.title}\nDescription: ${prog.description}`
+                            })),
+                            { label: 'CTA Text', value: content.ctaText || '' }
+                        ]
+                    };
+                    
+                case 'lead-form':
+                    return {
+                        type: 'Lead Generation Form',
+                        variant: section.variant,
+                        content: [
+                            { label: 'Eyebrow', value: content.eyebrow || '' },
+                            { label: 'Title', value: content.title || '' },
+                            { label: 'Description', value: content.description || '' },
+                            { label: 'Form Fields', value: (content.fields || []).map(f => f.label).join(', ') },
+                            { label: 'Dropdown Label', value: content.dropdownLabel || '' },
+                            { label: 'Dropdown Options', value: (content.dropdownOptions || []).join(', ') },
+                            { label: 'Submit Button', value: content.submitText || '' }
+                        ]
+                    };
+                    
+                case 'testimonial-single':
+                    return {
+                        type: 'Single Testimonial',
+                        variant: section.variant,
+                        content: [
+                            { label: 'Eyebrow', value: content.eyebrow || '' },
+                            { label: 'Title', value: content.title || '' },
+                            { label: 'Quote', value: content.quote || '' },
+                            { label: 'Name', value: content.name || '' },
+                            { label: 'Role', value: content.role || '' }
+                        ]
+                    };
+                    
+                case 'testimonial-carousel':
+                    return {
+                        type: 'Testimonial Carousel',
+                        variant: section.variant,
+                        content: [
+                            { label: 'Eyebrow', value: content.eyebrow || '' },
+                            { label: 'Title', value: content.title || '' },
+                            { label: 'Testimonial Quote', value: content['testimonial-quote-0'] || '' },
+                            { label: 'Testimonial Name', value: content['testimonial-name-0'] || '' },
+                            { label: 'Testimonial Role', value: content['testimonial-role-0'] || '' }
+                        ]
+                    };
+                    
+                default:
+                    return {
+                        type: 'Unknown Section',
+                        variant: section.variant,
+                        content: [{ label: 'Data', value: JSON.stringify(content) }]
+                    };
+            }
+        }
+    }
+
+    const googleDocsExporter = new GoogleDocsExporter();
+
+    // Add Google Docs export button to header
+    function addGoogleDocsExportButton() {
+        const headerActions = document.querySelector('.header-actions');
+        
+        const googleDocsBtn = document.createElement('button');
+        googleDocsBtn.id = 'exportGoogleDocsBtn';
+        googleDocsBtn.className = 'btn btn-primary';
+        googleDocsBtn.textContent = 'Export to Google Docs';
+        googleDocsBtn.addEventListener('click', async () => {
+            if (state.sections.length === 0) {
+                alert('Please add sections to export');
+                return;
+            }
+
+            try {
+                googleDocsBtn.disabled = true;
+                googleDocsBtn.textContent = 'Exporting...';
+                await googleDocsExporter.exportToGoogleDocs();
+            } catch (error) {
+                console.error('Export failed:', error);
+            } finally {
+                googleDocsBtn.disabled = false;
+                googleDocsBtn.textContent = 'Export to Google Docs';
+            }
+        });
+
+        const exportImageBtn = document.getElementById('exportImageBtn');
+        headerActions.insertBefore(googleDocsBtn, exportImageBtn);
     }
 
     // Delete all sections with confirmation

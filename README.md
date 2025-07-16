@@ -97,8 +97,20 @@ The tool provides real-time guidance for optimal content length:
 
 ### Exporting Your Work
 - **Export as Image**: Creates a high-quality PNG for presentations
+- **Export to Google Docs**: Creates a formatted Google Doc with all your content
 - **Export JSON**: Saves all content and layout data
 - **Import JSON**: Reload previous work to continue editing
+
+#### Setting up Google Docs Export (One-time setup for developers)
+1. Go to [script.google.com](https://script.google.com)
+2. Create a new project
+3. Copy the Google Apps Script code from the comments in `script.js` (lines 944-1001)
+4. Deploy as Web App:
+   - Execute as: Me
+   - Who has access: Anyone
+5. Copy the deployment URL's script ID
+6. Replace `YOUR_SCRIPT_ID` in `script.js` line 942 with your actual script ID
+7. The export button will now work for all users without any configuration needed
 
 ### Keyboard Shortcuts
 - `Ctrl/Cmd + Z`: Undo
