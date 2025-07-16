@@ -509,6 +509,57 @@
                     </div>
                 `;
             }
+        },
+        'image-content': {
+            name: 'Image + Content',
+            variants: ['light', 'dark'],
+            render: (variant = 'light', content = {}) => {
+                const defaults = {
+                    eyebrow: 'Campus Life',
+                    title: 'Visit Our Campus',
+                    body: 'Located in the heart of the city, our campus blends modern facilities with a close-knit community feel.\n\n• Central location with public transit access\n• On-campus housing available\n• Dedicated student success center',
+                    ctaText: 'Explore Programs'
+                };
+                const data = { ...defaults, ...content };
+                
+                // Sanitize all user content
+                Object.keys(data).forEach(key => {
+                    if (typeof data[key] === 'string') {
+                        data[key] = escapeHtml(data[key]);
+                    }
+                });
+                
+                // Preserve line breaks in body content
+                const formattedBody = data.body.replace(/\n/g, '<br>');
+                
+                return `
+                    <div class="section image-content ${variant}" data-section-type="image-content">
+                        <div class="section-container">
+                            <div class="image-content-grid">
+                                <div class="image-column">
+                                    <div class="content-image">Mountain Graphic</div>
+                                </div>
+                                <div class="content-column">
+                                    <div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>
+                                    <h2 class="section-title editable" contenteditable="true" data-field="title">${data.title}</h2>
+                                    <div class="body-content editable" contenteditable="true" data-field="body">${formattedBody}</div>
+                                    <a href="#" class="cta-button editable" contenteditable="true" data-field="ctaText">${data.ctaText}</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="drag-handle" draggable="true" aria-label="Drag to reorder section">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                                <path d="M9 3h6M9 7h6M9 11h6M9 15h6M9 19h6" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="section-controls">
+                            <button class="control-btn duplicate-btn" aria-label="Duplicate section">Duplicate</button>
+                            <button class="control-btn variant-btn" aria-label="Toggle theme variant">Toggle Theme</button>
+                            <button class="control-btn delete delete-btn" aria-label="Delete section">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }
         }
     };
 
@@ -1070,6 +1121,47 @@
                 'Keep consistent across testimonials'
             ]
         },
+        'image-content-eyebrow': {
+            maxChars: 35,
+            idealChars: 25,
+            tips: [
+                'Keep eyebrow text to 3-5 words',
+                'Use as category label or key benefit',
+                'Examples: "Campus Life", "Our Location", "Student Experience"',
+                'Avoid punctuation and full sentences'
+            ]
+        },
+        'image-content-title': {
+            maxChars: 70,
+            idealChars: 45,
+            tips: [
+                'Headlines work best at 6-12 words (35-70 characters)',
+                'Front-load with key benefit or outcome',
+                'Use power words that evoke emotion',
+                'Make it specific to your audience'
+            ]
+        },
+        'image-content-body': {
+            maxChars: 600,
+            idealChars: 400,
+            tips: [
+                'Limit to 50-75 words for best readability',
+                'Lead with most compelling benefit',
+                'Use simple, conversational language',
+                'Can include bullet points using • symbol',
+                'Each sentence should add new value'
+            ]
+        },
+        'image-content-cta': {
+            maxChars: 25,
+            idealChars: 15,
+            tips: [
+                'Best CTAs are 2-3 words',
+                'Start with action verb',
+                'Examples: "Learn More", "Explore Campus", "Schedule Visit"',
+                'Match CTA to user intent'
+            ]
+        },
         'general': {
             tips: [
                 'Mobile users see 30-40% less content',
@@ -1125,10 +1217,31 @@
         let elementType = 'general';
         const classList = element.classList;
         
-        for (const className of classList) {
-            if (writingGuidelines[className]) {
-                elementType = className;
-                break;
+        // Check for section-specific guidelines first
+        const parentSection = element.closest('.section');
+        if (parentSection) {
+            const sectionType = parentSection.dataset.sectionType;
+            if (sectionType === 'image-content') {
+                // Map image-content fields to their specific guidelines
+                if (element.classList.contains('eyebrow')) {
+                    elementType = 'image-content-eyebrow';
+                } else if (element.classList.contains('section-title')) {
+                    elementType = 'image-content-title';
+                } else if (element.classList.contains('body-content')) {
+                    elementType = 'image-content-body';
+                } else if (element.classList.contains('cta-button')) {
+                    elementType = 'image-content-cta';
+                }
+            }
+        }
+        
+        // If no section-specific guideline found, check general classes
+        if (elementType === 'general') {
+            for (const className of classList) {
+                if (writingGuidelines[className]) {
+                    elementType = className;
+                    break;
+                }
             }
         }
         
@@ -1214,10 +1327,30 @@
         const length = element.textContent.trim().length;
         let guideline = null;
         
-        for (const className of element.classList) {
-            if (writingGuidelines[className]) {
-                guideline = writingGuidelines[className];
-                break;
+        // Check for section-specific guidelines first
+        const parentSection = element.closest('.section');
+        if (parentSection) {
+            const sectionType = parentSection.dataset.sectionType;
+            if (sectionType === 'image-content') {
+                if (element.classList.contains('eyebrow')) {
+                    guideline = writingGuidelines['image-content-eyebrow'];
+                } else if (element.classList.contains('section-title')) {
+                    guideline = writingGuidelines['image-content-title'];
+                } else if (element.classList.contains('body-content')) {
+                    guideline = writingGuidelines['image-content-body'];
+                } else if (element.classList.contains('cta-button')) {
+                    guideline = writingGuidelines['image-content-cta'];
+                }
+            }
+        }
+        
+        // If no section-specific guideline found, check general classes
+        if (!guideline) {
+            for (const className of element.classList) {
+                if (writingGuidelines[className]) {
+                    guideline = writingGuidelines[className];
+                    break;
+                }
             }
         }
         
@@ -1246,10 +1379,30 @@
     function checkContentLength(element) {
         let guideline = null;
         
-        for (const className of element.classList) {
-            if (writingGuidelines[className]) {
-                guideline = writingGuidelines[className];
-                break;
+        // Check for section-specific guidelines first
+        const parentSection = element.closest('.section');
+        if (parentSection) {
+            const sectionType = parentSection.dataset.sectionType;
+            if (sectionType === 'image-content') {
+                if (element.classList.contains('eyebrow')) {
+                    guideline = writingGuidelines['image-content-eyebrow'];
+                } else if (element.classList.contains('section-title')) {
+                    guideline = writingGuidelines['image-content-title'];
+                } else if (element.classList.contains('body-content')) {
+                    guideline = writingGuidelines['image-content-body'];
+                } else if (element.classList.contains('cta-button')) {
+                    guideline = writingGuidelines['image-content-cta'];
+                }
+            }
+        }
+        
+        // If no section-specific guideline found, check general classes
+        if (!guideline) {
+            for (const className of element.classList) {
+                if (writingGuidelines[className]) {
+                    guideline = writingGuidelines[className];
+                    break;
+                }
             }
         }
         
@@ -1276,10 +1429,30 @@
         let elementType = 'general';
         const classList = element.classList;
         
-        for (const className of classList) {
-            if (writingGuidelines[className]) {
-                elementType = className;
-                break;
+        // Check for section-specific guidelines first
+        const parentSection = element.closest('.section');
+        if (parentSection) {
+            const sectionType = parentSection.dataset.sectionType;
+            if (sectionType === 'image-content') {
+                if (element.classList.contains('eyebrow')) {
+                    elementType = 'image-content-eyebrow';
+                } else if (element.classList.contains('section-title')) {
+                    elementType = 'image-content-title';
+                } else if (element.classList.contains('body-content')) {
+                    elementType = 'image-content-body';
+                } else if (element.classList.contains('cta-button')) {
+                    elementType = 'image-content-cta';
+                }
+            }
+        }
+        
+        // If no section-specific guideline found, check general classes
+        if (elementType === 'general') {
+            for (const className of classList) {
+                if (writingGuidelines[className]) {
+                    elementType = className;
+                    break;
+                }
             }
         }
         

@@ -366,6 +366,50 @@ body {
     background: var(--light-gray);
 }
 
+/* Image + Content Section */
+.image-content-grid {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 3rem;
+    align-items: center;
+}
+
+.image-column {
+    flex-shrink: 0;
+}
+
+.content-image {
+    width: 100%;
+    height: 400px;
+    background: linear-gradient(135deg, var(--primary-red) 0%, var(--dark-navy) 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.section.dark .content-image {
+    background: linear-gradient(135deg, var(--dark-navy) 0%, var(--primary-red) 100%);
+}
+
+.content-column {
+    max-width: 600px;
+}
+
+.image-content .eyebrow,
+.image-content .section-title {
+    text-align: left;
+}
+
+.image-content .body-content {
+    margin-bottom: 2rem;
+    line-height: 1.8;
+    white-space: pre-wrap;
+}
+
 /* Three Column Section */
 .three-column-grid {
     display: grid;
@@ -725,6 +769,17 @@ body {
     gap: 1.5rem;
 }
 
+.canvas.tablet .image-content-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+.canvas.tablet .content-image {
+    height: 300px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
 .canvas.tablet .form-layout {
     grid-template-columns: 1fr;
     gap: 2rem;
@@ -738,6 +793,16 @@ body {
 .canvas.mobile .program-grid {
     grid-template-columns: 1fr;
     gap: 1.25rem;
+}
+
+.canvas.mobile .image-content-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.canvas.mobile .content-image {
+    height: 200px;
+    max-width: 100%;
 }
 
 .canvas.mobile .stat-number {
