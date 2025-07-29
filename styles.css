@@ -1592,3 +1592,57 @@ body {
     width: 16px;
     height: 16px;
 }
+
+/* Layout Toggle Styles */
+.form-layout.reversed {
+    grid-template-columns: 1fr 1fr;
+}
+
+.form-layout.reversed .form-content {
+    order: 2;
+}
+
+.form-layout.reversed .form-image {
+    order: 1;
+}
+
+.image-content-grid.reversed {
+    grid-template-columns: 1fr 400px;
+}
+
+.image-content-grid.reversed .image-column {
+    order: 2;
+}
+
+.image-content-grid.reversed .content-column {
+    order: 1;
+}
+
+/* Responsive behavior for reversed layouts */
+@media (max-width: 1024px) {
+    .canvas.tablet .form-layout.reversed,
+    .canvas.tablet .image-content-grid.reversed {
+        grid-template-columns: 1fr;
+    }
+    
+    .canvas.tablet .form-layout.reversed .form-content,
+    .canvas.tablet .form-layout.reversed .form-image,
+    .canvas.tablet .image-content-grid.reversed .image-column,
+    .canvas.tablet .image-content-grid.reversed .content-column {
+        order: initial;
+    }
+}
+
+@media (max-width: 768px) {
+    .canvas.mobile .form-layout.reversed,
+    .canvas.mobile .image-content-grid.reversed {
+        grid-template-columns: 1fr;
+    }
+    
+    .canvas.mobile .form-layout.reversed .form-content,
+    .canvas.mobile .form-layout.reversed .form-image,
+    .canvas.mobile .image-content-grid.reversed .image-column,
+    .canvas.mobile .image-content-grid.reversed .content-column {
+        order: initial;
+    }
+}

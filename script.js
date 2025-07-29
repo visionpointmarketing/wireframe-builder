@@ -298,7 +298,7 @@
         'lead-form': {
             name: 'Lead Generation Form',
             variants: ['light', 'dark'],
-            render: (variant = 'light', content = {}) => {
+            render: (variant = 'light', content = {}, layoutDirection = 'normal') => {
                 const defaults = {
                     eyebrow: 'Get Started',
                     title: 'Request Information',
@@ -332,7 +332,7 @@
                 return `
                     <div class="section lead-form ${variant}" data-section-type="lead-form">
                         <div class="section-container">
-                            <div class="form-layout">
+                            <div class="form-layout ${layoutDirection === 'reversed' ? 'reversed' : ''}">
                                 <div class="form-content">
                                     <div class="form-header">
                                         <div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>
@@ -440,6 +440,7 @@
                         <div class="section-controls">
                             <button class="control-btn duplicate-btn" aria-label="Duplicate section">Duplicate</button>
                             <button class="control-btn variant-btn" aria-label="Toggle theme variant">Toggle Theme</button>
+                            <button class="control-btn layout-btn" aria-label="Toggle layout direction">Toggle Layout</button>
                             <button class="control-btn delete delete-btn" aria-label="Delete section">Delete</button>
                         </div>
                     </div>
@@ -582,7 +583,7 @@
         'image-content': {
             name: 'Image + Content',
             variants: ['light', 'dark'],
-            render: (variant = 'light', content = {}) => {
+            render: (variant = 'light', content = {}, layoutDirection = 'normal') => {
                 const defaults = {
                     eyebrow: 'Campus Life',
                     title: 'Visit Our Campus',
@@ -604,7 +605,7 @@
                 return `
                     <div class="section image-content ${variant}" data-section-type="image-content">
                         <div class="section-container">
-                            <div class="image-content-grid">
+                            <div class="image-content-grid ${layoutDirection === 'reversed' ? 'reversed' : ''}">
                                 <div class="image-column">
                                     <div class="content-image">Mountain Graphic</div>
                                 </div>
@@ -624,6 +625,7 @@
                         <div class="section-controls">
                             <button class="control-btn duplicate-btn" aria-label="Duplicate section">Duplicate</button>
                             <button class="control-btn variant-btn" aria-label="Toggle theme variant">Toggle Theme</button>
+                            <button class="control-btn layout-btn" aria-label="Toggle layout direction">Toggle Layout</button>
                             <button class="control-btn delete delete-btn" aria-label="Delete section">Delete</button>
                         </div>
                     </div>
@@ -657,6 +659,16 @@
             
             if (state.sections[index]) {
                 state.sections[index].variant = state.sections[index].variant === 'light' ? 'dark' : 'light';
+                updateCanvas();
+            }
+        },
+        
+        toggleLayout: function(btn) {
+            const section = btn.closest('.section');
+            const index = Array.from(canvas.querySelectorAll('.section')).indexOf(section);
+            
+            if (state.sections[index] && state.sections[index].layoutDirection !== undefined) {
+                state.sections[index].layoutDirection = state.sections[index].layoutDirection === 'normal' ? 'reversed' : 'normal';
                 updateCanvas();
             }
         },
@@ -757,6 +769,8 @@
                 eventHandlers.duplicateSection(e.target);
             } else if (e.target.classList.contains('variant-btn')) {
                 eventHandlers.toggleVariant(e.target);
+            } else if (e.target.classList.contains('layout-btn')) {
+                eventHandlers.toggleLayout(e.target);
             } else if (e.target.classList.contains('delete-btn')) {
                 eventHandlers.deleteSection(e.target);
             }
@@ -790,6 +804,11 @@
             variant,
             content
         };
+        
+        // Add layoutDirection for sections that support it
+        if (type === 'lead-form' || type === 'image-content') {
+            sectionData.layoutDirection = 'normal';
+        }
 
         state.sections.push(sectionData);
         updateCanvas();
@@ -805,7 +824,7 @@
 
         const wireframeHtml = state.sections.map(section => {
             const template = sectionTemplates[section.type];
-            return template ? template.render(section.variant, section.content) : '';
+            return template ? template.render(section.variant, section.content, section.layoutDirection) : '';
         }).join('');
 
         canvas.innerHTML = `<div class="wireframe-container">${wireframeHtml}</div>`;
