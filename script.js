@@ -304,14 +304,12 @@
                     title: 'Request Information',
                     description: 'Connect with an advisor within 24 hours.',
                     fields: [
-                        { label: 'First Name', type: 'text', required: true },
-                        { label: 'Last Name', type: 'text', required: true },
-                        { label: 'Email', type: 'email', required: true },
-                        { label: 'Phone', type: 'tel', required: false },
-                        { label: 'Birth Date', type: 'date', required: false }
+                        { id: 'field_default_1', label: 'First Name', type: 'text', required: true },
+                        { id: 'field_default_2', label: 'Last Name', type: 'text', required: true },
+                        { id: 'field_default_3', label: 'Email', type: 'email', required: true },
+                        { id: 'field_default_4', label: 'Phone', type: 'tel', required: false },
+                        { id: 'field_default_5', label: 'Birth Date', type: 'date', required: false }
                     ],
-                    dropdownLabel: 'Start Term',
-                    dropdownOptions: ['Fall 2025', 'Spring 2026', 'Summer 2026'],
                     submitText: 'Send'
                 };
                 const data = { ...defaults, ...content };
@@ -320,15 +318,16 @@
                 if (typeof data.eyebrow === 'string') data.eyebrow = escapeHtml(data.eyebrow);
                 if (typeof data.title === 'string') data.title = escapeHtml(data.title);
                 if (typeof data.description === 'string') data.description = escapeHtml(data.description);
-                if (typeof data.dropdownLabel === 'string') data.dropdownLabel = escapeHtml(data.dropdownLabel);
                 if (typeof data.submitText === 'string') data.submitText = escapeHtml(data.submitText);
                 
+                // Ensure fields have proper structure and sanitization
                 data.fields = data.fields.map(field => ({
                     ...field,
-                    label: escapeHtml(field.label || '')
+                    label: escapeHtml(field.label || ''),
+                    placeholder: field.placeholder ? escapeHtml(field.placeholder) : '',
+                    helpText: field.helpText ? escapeHtml(field.helpText) : '',
+                    options: field.options ? field.options.map(opt => escapeHtml(opt)) : undefined
                 }));
-                
-                data.dropdownOptions = data.dropdownOptions.map(opt => escapeHtml(opt));
                 
                 return `
                     <div class="section lead-form ${variant}" data-section-type="lead-form">
@@ -341,20 +340,90 @@
                                         <p class="form-description editable" contenteditable="true" data-field="description">${data.description}</p>
                                     </div>
                                     <form class="lead-generation-form" onsubmit="return false;">
-                                        ${data.fields.map((field, i) => `
-                                            <div class="form-field">
-                                                <label for="field-${i}" class="editable" contenteditable="true" data-field="field-label-${i}">${field.label}${field.required ? ' *' : ''}</label>
-                                                <input type="${field.type}" id="field-${i}" placeholder="${field.label}" ${field.required ? 'required' : ''} aria-required="${field.required}">
-                                            </div>
-                                        `).join('')}
-                                        <div class="form-field">
-                                            <label for="dropdown-field" class="editable" contenteditable="true" data-field="dropdownLabel">${data.dropdownLabel}</label>
-                                            <select id="dropdown-field">
-                                                ${data.dropdownOptions.map(option => `
-                                                    <option value="${option}">${option}</option>
-                                                `).join('')}
-                                            </select>
-                                        </div>
+                                        ${data.fields.map((field, i) => {
+                                            let fieldHtml = '<div class="form-field">';
+                                            fieldHtml += `<label for="field-${i}">${field.label}${field.required ? ' *' : ''}</label>`;
+                                            
+                                            // Render different field types
+                                            switch (field.type) {
+                                                case 'select':
+                                                    fieldHtml += `<select id="field-${i}" ${field.required ? 'required' : ''} aria-required="${field.required}">`;
+                                                    fieldHtml += `<option value="">Select...</option>`;
+                                                    if (field.options) {
+                                                        field.options.forEach(option => {
+                                                            fieldHtml += `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`;
+                                                        });
+                                                    }
+                                                    fieldHtml += `</select>`;
+                                                    break;
+                                                    
+                                                case 'textarea':
+                                                    fieldHtml += `<textarea id="field-${i}" placeholder="${escapeHtml(field.placeholder || field.label)}" rows="${field.rows || 4}" ${field.required ? 'required' : ''} aria-required="${field.required}"></textarea>`;
+                                                    break;
+                                                    
+                                                case 'radio':
+                                                    if (field.options) {
+                                                        fieldHtml += '<div class="radio-group">';
+                                                        field.options.forEach((option, optIndex) => {
+                                                            fieldHtml += `
+                                                                <label class="radio-label">
+                                                                    <input type="radio" name="field-${i}" value="${escapeHtml(option)}" ${field.required && optIndex === 0 ? 'required' : ''}>
+                                                                    ${escapeHtml(option)}
+                                                                </label>
+                                                            `;
+                                                        });
+                                                        fieldHtml += '</div>';
+                                                    }
+                                                    break;
+                                                    
+                                                case 'checkbox':
+                                                    if (field.options && field.options.length > 1) {
+                                                        fieldHtml += '<div class="checkbox-group">';
+                                                        field.options.forEach((option) => {
+                                                            fieldHtml += `
+                                                                <label class="checkbox-label">
+                                                                    <input type="checkbox" name="field-${i}" value="${escapeHtml(option)}">
+                                                                    ${escapeHtml(option)}
+                                                                </label>
+                                                            `;
+                                                        });
+                                                        fieldHtml += '</div>';
+                                                    } else {
+                                                        fieldHtml = '<div class="form-field checkbox-single">';
+                                                        fieldHtml += `
+                                                            <label class="checkbox-label">
+                                                                <input type="checkbox" id="field-${i}" ${field.required ? 'required' : ''}>
+                                                                <span>${field.label}</span>
+                                                            </label>
+                                                        `;
+                                                    }
+                                                    break;
+                                                    
+                                                case 'consent':
+                                                    fieldHtml = '<div class="form-field consent-field">';
+                                                    fieldHtml += `
+                                                        <label class="checkbox-label">
+                                                            <input type="checkbox" id="field-${i}" ${field.required ? 'required' : ''}>
+                                                            <span>${field.label}</span>
+                                                        </label>
+                                                    `;
+                                                    break;
+                                                    
+                                                default:
+                                                    // Standard input types (text, email, tel, number, date)
+                                                    fieldHtml += `<input type="${field.type}" id="field-${i}" placeholder="${escapeHtml(field.placeholder || field.label)}" ${field.required ? 'required' : ''} aria-required="${field.required}"`;
+                                                    if (field.type === 'number' && field.min !== null) fieldHtml += ` min="${field.min}"`;
+                                                    if (field.type === 'number' && field.max !== null) fieldHtml += ` max="${field.max}"`;
+                                                    fieldHtml += '>';
+                                            }
+                                            
+                                            if (field.helpText) {
+                                                fieldHtml += `<small class="field-help">${escapeHtml(field.helpText)}</small>`;
+                                            }
+                                            
+                                            fieldHtml += '</div>';
+                                            return fieldHtml;
+                                        }).join('')}
                                         <button type="submit" class="submit-btn editable" contenteditable="true" data-field="submitText">${data.submitText}</button>
                                     </form>
                                 </div>
@@ -609,6 +678,7 @@
         initializeGuidance();
         initializeDragAndDrop();
         addGoogleDocsExportButton();
+        addFormSettingsButton();
         updateCanvas(false);
         saveToHistory();
     });
@@ -729,6 +799,7 @@
     function updateCanvas(saveHistory = true) {
         if (state.sections.length === 0) {
             canvas.innerHTML = '<div class="empty-state"><p>Click a section from the library to get started</p></div>';
+            updateFormSettingsVisibility();
             return;
         }
 
@@ -738,6 +809,8 @@
         }).join('');
 
         canvas.innerHTML = `<div class="wireframe-container">${wireframeHtml}</div>`;
+        
+        updateFormSettingsVisibility();
         
         if (saveHistory) {
             saveToHistory();
@@ -1144,18 +1217,30 @@
                     };
                     
                 case 'lead-form':
+                    const formContent = [
+                        { label: 'Eyebrow', value: content.eyebrow || '' },
+                        { label: 'Title', value: content.title || '' },
+                        { label: 'Description', value: content.description || '' }
+                    ];
+                    
+                    // Add detailed field information
+                    if (content.fields && content.fields.length > 0) {
+                        formContent.push({ label: 'Form Fields', value: '' });
+                        content.fields.forEach((field, index) => {
+                            let fieldInfo = `  ${index + 1}. ${field.label} (${field.type})`;
+                            if (field.required) fieldInfo += ' *Required';
+                            if (field.placeholder) fieldInfo += ` - Placeholder: "${field.placeholder}"`;
+                            if (field.options) fieldInfo += ` - Options: ${field.options.join(', ')}`;
+                            formContent.push({ label: '', value: fieldInfo });
+                        });
+                    }
+                    
+                    formContent.push({ label: 'Submit Button', value: content.submitText || '' });
+                    
                     return {
                         type: 'Lead Generation Form',
                         variant: section.variant,
-                        content: [
-                            { label: 'Eyebrow', value: content.eyebrow || '' },
-                            { label: 'Title', value: content.title || '' },
-                            { label: 'Description', value: content.description || '' },
-                            { label: 'Form Fields', value: (content.fields || []).map(f => f.label).join(', ') },
-                            { label: 'Dropdown Label', value: content.dropdownLabel || '' },
-                            { label: 'Dropdown Options', value: (content.dropdownOptions || []).join(', ') },
-                            { label: 'Submit Button', value: content.submitText || '' }
-                        ]
+                        content: formContent
                     };
                     
                 case 'testimonial-single':
@@ -1196,6 +1281,489 @@
 
     const googleDocsExporter = new GoogleDocsExporter();
 
+    // Form Builder Class
+    class FormBuilder {
+        constructor() {
+            this.modal = document.getElementById('formBuilderBackdrop');
+            this.fieldsList = document.getElementById('formFieldsList');
+            this.fieldProperties = document.getElementById('fieldProperties');
+            this.fieldTypeSelector = document.getElementById('fieldTypeSelector');
+            this.currentSectionIndex = null;
+            this.selectedFieldId = null;
+            this.formFields = [];
+            
+            this.fieldTypes = {
+                text: { label: 'Text Input', icon: 'Aa', defaultLabel: 'Text Field' },
+                email: { label: 'Email', icon: '@', defaultLabel: 'Email Address' },
+                tel: { label: 'Phone', icon: '📱', defaultLabel: 'Phone Number' },
+                number: { label: 'Number', icon: '#', defaultLabel: 'Number' },
+                date: { label: 'Date', icon: '📅', defaultLabel: 'Date' },
+                select: { label: 'Dropdown', icon: '▼', defaultLabel: 'Select Option' },
+                radio: { label: 'Radio', icon: '◉', defaultLabel: 'Radio Group' },
+                checkbox: { label: 'Checkbox', icon: '☑', defaultLabel: 'Checkbox' },
+                textarea: { label: 'Textarea', icon: '¶', defaultLabel: 'Comments' },
+                consent: { label: 'Consent', icon: '✓', defaultLabel: 'I agree to the terms' }
+            };
+            
+            this.templates = {
+                basic: {
+                    name: 'Basic Contact',
+                    fields: [
+                        { type: 'text', label: 'First Name', required: true },
+                        { type: 'text', label: 'Last Name', required: true },
+                        { type: 'email', label: 'Email', required: true },
+                        { type: 'tel', label: 'Phone', required: false }
+                    ]
+                },
+                event: {
+                    name: 'Event Registration',
+                    fields: [
+                        { type: 'text', label: 'Full Name', required: true },
+                        { type: 'email', label: 'Email', required: true },
+                        { type: 'tel', label: 'Phone', required: true },
+                        { type: 'select', label: 'Event Date', required: true, options: ['March 15, 2024', 'March 22, 2024', 'March 29, 2024'] },
+                        { type: 'number', label: 'Number of Attendees', required: true },
+                        { type: 'textarea', label: 'Special Requirements', required: false }
+                    ]
+                },
+                inquiry: {
+                    name: 'Program Inquiry',
+                    fields: [
+                        { type: 'text', label: 'First Name', required: true },
+                        { type: 'text', label: 'Last Name', required: true },
+                        { type: 'email', label: 'Email', required: true },
+                        { type: 'tel', label: 'Phone', required: false },
+                        { type: 'select', label: 'Program of Interest', required: true, options: ['MBA', 'Computer Science', 'Engineering', 'Healthcare'] },
+                        { type: 'select', label: 'Start Term', required: true, options: ['Fall 2024', 'Spring 2025', 'Summer 2025'] },
+                        { type: 'radio', label: 'Enrollment Status', required: true, options: ['First-Time Student', 'Transfer Student', 'Returning Student'] },
+                        { type: 'textarea', label: 'Tell us about yourself', required: false }
+                    ]
+                },
+                newsletter: {
+                    name: 'Newsletter Signup',
+                    fields: [
+                        { type: 'email', label: 'Email Address', required: true },
+                        { type: 'text', label: 'First Name', required: false },
+                        { type: 'checkbox', label: 'Send me weekly updates', required: false },
+                        { type: 'consent', label: 'I agree to receive marketing communications', required: true }
+                    ]
+                }
+            };
+            
+            this.init();
+        }
+        
+        init() {
+            // Modal controls
+            document.getElementById('closeFormBuilder').addEventListener('click', () => this.close());
+            document.getElementById('cancelFormBuilder').addEventListener('click', () => this.close());
+            document.getElementById('saveFormBuilder').addEventListener('click', () => this.save());
+            
+            // Add field button
+            document.getElementById('addFieldBtn').addEventListener('click', () => this.showFieldTypeSelector());
+            
+            // Field type selection
+            document.querySelectorAll('.field-type-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const type = btn.dataset.type;
+                    this.addField(type);
+                    this.hideFieldTypeSelector();
+                });
+            });
+            
+            // Template buttons
+            document.querySelectorAll('.template-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const template = btn.dataset.template;
+                    this.loadTemplate(template);
+                });
+            });
+            
+            // Click outside field type selector to close
+            this.modal.addEventListener('click', (e) => {
+                if (!e.target.closest('.field-type-selector') && !e.target.closest('#addFieldBtn')) {
+                    this.hideFieldTypeSelector();
+                }
+            });
+        }
+        
+        open(sectionIndex) {
+            this.currentSectionIndex = sectionIndex;
+            const section = state.sections[sectionIndex];
+            
+            if (section && section.type === 'lead-form') {
+                // Load existing form fields or defaults
+                this.formFields = JSON.parse(JSON.stringify(section.content.fields || [
+                    { id: this.generateFieldId(), type: 'text', label: 'First Name', required: true },
+                    { id: this.generateFieldId(), type: 'text', label: 'Last Name', required: true },
+                    { id: this.generateFieldId(), type: 'email', label: 'Email', required: true },
+                    { id: this.generateFieldId(), type: 'tel', label: 'Phone', required: false },
+                    { id: this.generateFieldId(), type: 'date', label: 'Birth Date', required: false }
+                ]));
+                
+                // Ensure all fields have IDs
+                this.formFields.forEach(field => {
+                    if (!field.id) field.id = this.generateFieldId();
+                });
+                
+                this.renderFields();
+                this.modal.style.display = 'flex';
+            }
+        }
+        
+        close() {
+            this.modal.style.display = 'none';
+            this.hideFieldTypeSelector();
+            this.selectedFieldId = null;
+        }
+        
+        save() {
+            if (this.currentSectionIndex !== null) {
+                const section = state.sections[this.currentSectionIndex];
+                if (section && section.type === 'lead-form') {
+                    section.content.fields = JSON.parse(JSON.stringify(this.formFields));
+                    updateCanvas();
+                    this.close();
+                }
+            }
+        }
+        
+        generateFieldId() {
+            return 'field_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+        
+        addField(type) {
+            const fieldType = this.fieldTypes[type];
+            const field = {
+                id: this.generateFieldId(),
+                type: type,
+                label: fieldType.defaultLabel,
+                placeholder: '',
+                required: false,
+                helpText: ''
+            };
+            
+            // Add type-specific properties
+            if (type === 'select' || type === 'radio' || type === 'checkbox') {
+                field.options = ['Option 1', 'Option 2', 'Option 3'];
+            }
+            
+            if (type === 'number') {
+                field.min = null;
+                field.max = null;
+            }
+            
+            if (type === 'textarea') {
+                field.rows = 4;
+            }
+            
+            this.formFields.push(field);
+            this.renderFields();
+            this.selectField(field.id);
+        }
+        
+        removeField(fieldId) {
+            const index = this.formFields.findIndex(f => f.id === fieldId);
+            if (index > -1) {
+                this.formFields.splice(index, 1);
+                this.renderFields();
+                if (this.selectedFieldId === fieldId) {
+                    this.selectedFieldId = null;
+                    this.renderProperties();
+                }
+            }
+        }
+        
+        selectField(fieldId) {
+            this.selectedFieldId = fieldId;
+            document.querySelectorAll('.field-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.fieldId === fieldId);
+            });
+            this.renderProperties();
+        }
+        
+        renderFields() {
+            this.fieldsList.innerHTML = this.formFields.map((field, index) => {
+                const fieldType = this.fieldTypes[field.type];
+                return `
+                    <div class="field-item" data-field-id="${field.id}" data-index="${index}">
+                        <div class="field-drag-handle">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 3h6M9 7h6M9 11h6M9 15h6M9 19h6"/>
+                            </svg>
+                        </div>
+                        <div class="field-info">
+                            <div class="field-label">
+                                ${escapeHtml(field.label)}
+                                ${field.required ? '<span class="field-required">*</span>' : ''}
+                            </div>
+                            <div class="field-type">${fieldType.label}</div>
+                        </div>
+                        <button class="field-delete" data-field-id="${field.id}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 6L6 18M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+            
+            // Add click handlers
+            this.fieldsList.querySelectorAll('.field-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    if (!e.target.closest('.field-delete')) {
+                        this.selectField(item.dataset.fieldId);
+                    }
+                });
+            });
+            
+            // Add delete handlers
+            this.fieldsList.querySelectorAll('.field-delete').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (confirm('Delete this field?')) {
+                        this.removeField(btn.dataset.fieldId);
+                    }
+                });
+            });
+            
+            // Initialize drag and drop
+            this.initFieldDragDrop();
+        }
+        
+        renderProperties() {
+            const field = this.formFields.find(f => f.id === this.selectedFieldId);
+            
+            if (!field) {
+                this.fieldProperties.innerHTML = `
+                    <div class="empty-properties">
+                        <p>Select a field to edit its properties</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let propertiesHtml = `
+                <div class="property-group">
+                    <label>Field Label</label>
+                    <input type="text" id="fieldLabel" value="${escapeHtml(field.label || '')}">
+                </div>
+                
+                <div class="property-group">
+                    <label>Placeholder Text</label>
+                    <input type="text" id="fieldPlaceholder" value="${escapeHtml(field.placeholder || '')}">
+                </div>
+                
+                <div class="property-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="fieldRequired" ${field.required ? 'checked' : ''}>
+                        Required Field
+                    </label>
+                </div>
+                
+                <div class="property-group">
+                    <label>Help Text</label>
+                    <input type="text" id="fieldHelpText" value="${escapeHtml(field.helpText || '')}">
+                </div>
+            `;
+            
+            // Type-specific properties
+            if (field.type === 'select' || field.type === 'radio' || field.type === 'checkbox') {
+                propertiesHtml += `
+                    <div class="property-group">
+                        <label>Options</label>
+                        <div class="options-list">
+                            ${(field.options || []).map((option, index) => `
+                                <div class="option-item">
+                                    <input type="text" value="${escapeHtml(option)}" data-option-index="${index}">
+                                    <button class="option-remove" data-option-index="${index}">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M18 6L6 18M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="btn btn-secondary btn-sm add-option-btn">Add Option</button>
+                    </div>
+                `;
+            }
+            
+            if (field.type === 'number') {
+                propertiesHtml += `
+                    <div class="property-group">
+                        <label>Minimum Value</label>
+                        <input type="number" id="fieldMin" value="${field.min || ''}">
+                    </div>
+                    <div class="property-group">
+                        <label>Maximum Value</label>
+                        <input type="number" id="fieldMax" value="${field.max || ''}">
+                    </div>
+                `;
+            }
+            
+            if (field.type === 'textarea') {
+                propertiesHtml += `
+                    <div class="property-group">
+                        <label>Number of Rows</label>
+                        <input type="number" id="fieldRows" value="${field.rows || 4}" min="1" max="10">
+                    </div>
+                `;
+            }
+            
+            this.fieldProperties.innerHTML = propertiesHtml;
+            
+            // Add event listeners for property changes
+            this.fieldProperties.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', () => this.updateFieldProperty(input));
+            });
+            
+            // Option management
+            this.fieldProperties.querySelectorAll('.option-remove').forEach(btn => {
+                btn.addEventListener('click', () => this.removeOption(parseInt(btn.dataset.optionIndex)));
+            });
+            
+            const addOptionBtn = this.fieldProperties.querySelector('.add-option-btn');
+            if (addOptionBtn) {
+                addOptionBtn.addEventListener('click', () => this.addOption());
+            }
+        }
+        
+        updateFieldProperty(input) {
+            const field = this.formFields.find(f => f.id === this.selectedFieldId);
+            if (!field) return;
+            
+            switch (input.id) {
+                case 'fieldLabel':
+                    field.label = input.value;
+                    break;
+                case 'fieldPlaceholder':
+                    field.placeholder = input.value;
+                    break;
+                case 'fieldRequired':
+                    field.required = input.checked;
+                    break;
+                case 'fieldHelpText':
+                    field.helpText = input.value;
+                    break;
+                case 'fieldMin':
+                    field.min = input.value ? parseInt(input.value) : null;
+                    break;
+                case 'fieldMax':
+                    field.max = input.value ? parseInt(input.value) : null;
+                    break;
+                case 'fieldRows':
+                    field.rows = parseInt(input.value) || 4;
+                    break;
+            }
+            
+            // Handle option updates
+            if (input.dataset.optionIndex !== undefined) {
+                const index = parseInt(input.dataset.optionIndex);
+                if (field.options && field.options[index] !== undefined) {
+                    field.options[index] = input.value;
+                }
+            }
+            
+            this.renderFields();
+        }
+        
+        addOption() {
+            const field = this.formFields.find(f => f.id === this.selectedFieldId);
+            if (!field || !field.options) return;
+            
+            field.options.push(`Option ${field.options.length + 1}`);
+            this.renderProperties();
+        }
+        
+        removeOption(index) {
+            const field = this.formFields.find(f => f.id === this.selectedFieldId);
+            if (!field || !field.options) return;
+            
+            field.options.splice(index, 1);
+            this.renderProperties();
+        }
+        
+        showFieldTypeSelector() {
+            this.fieldTypeSelector.style.display = 'block';
+        }
+        
+        hideFieldTypeSelector() {
+            this.fieldTypeSelector.style.display = 'none';
+        }
+        
+        loadTemplate(templateName) {
+            const template = this.templates[templateName];
+            if (!template) return;
+            
+            if (confirm(`Load "${template.name}" template? This will replace all current fields.`)) {
+                this.formFields = template.fields.map(field => ({
+                    ...field,
+                    id: this.generateFieldId()
+                }));
+                this.renderFields();
+                this.selectedFieldId = null;
+                this.renderProperties();
+            }
+        }
+        
+        initFieldDragDrop() {
+            let draggedElement = null;
+            let draggedIndex = null;
+            
+            this.fieldsList.querySelectorAll('.field-item').forEach((item, index) => {
+                const handle = item.querySelector('.field-drag-handle');
+                
+                handle.addEventListener('mousedown', (e) => {
+                    draggedElement = item;
+                    draggedIndex = index;
+                    item.style.cursor = 'grabbing';
+                });
+                
+                item.addEventListener('dragstart', (e) => {
+                    if (e.target.closest('.field-drag-handle')) {
+                        e.dataTransfer.effectAllowed = 'move';
+                        draggedElement = item;
+                        draggedIndex = parseInt(item.dataset.index);
+                        item.classList.add('dragging');
+                    } else {
+                        e.preventDefault();
+                    }
+                });
+                
+                item.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    const draggingItem = this.fieldsList.querySelector('.dragging');
+                    if (!draggingItem || draggingItem === item) return;
+                    
+                    const rect = item.getBoundingClientRect();
+                    const midpoint = rect.top + rect.height / 2;
+                    
+                    if (e.clientY < midpoint) {
+                        item.parentNode.insertBefore(draggingItem, item);
+                    } else {
+                        item.parentNode.insertBefore(draggingItem, item.nextSibling);
+                    }
+                });
+                
+                item.addEventListener('dragend', () => {
+                    item.classList.remove('dragging');
+                    item.style.cursor = '';
+                    
+                    // Update field order
+                    const newOrder = Array.from(this.fieldsList.querySelectorAll('.field-item')).map(el => 
+                        this.formFields.find(f => f.id === el.dataset.fieldId)
+                    );
+                    this.formFields = newOrder;
+                });
+                
+                // Make draggable
+                item.draggable = true;
+            });
+        }
+    }
+    
+    const formBuilder = new FormBuilder();
+
     // Add Google Docs export button to header
     function addGoogleDocsExportButton() {
         const headerActions = document.querySelector('.header-actions');
@@ -1224,6 +1792,47 @@
 
         const exportImageBtn = document.getElementById('exportImageBtn');
         headerActions.insertBefore(googleDocsBtn, exportImageBtn);
+    }
+
+    // Add Form Settings button to sidebar
+    function addFormSettingsButton() {
+        const sectionLibrary = document.querySelector('.section-library');
+        
+        // Create container for form settings
+        const formSettingsContainer = document.createElement('div');
+        formSettingsContainer.className = 'form-settings-container';
+        formSettingsContainer.id = 'formSettingsContainer';
+        formSettingsContainer.style.display = 'none';
+        
+        const formSettingsBtn = document.createElement('button');
+        formSettingsBtn.className = 'form-settings-btn';
+        formSettingsBtn.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v6m0 6v6m6.364-15.364l-4.243 4.243m-4.242 4.242l-4.243 4.243m19.092-6.364h-6m-6 0h-6m15.364 6.364l-4.243-4.243m-4.242-4.242l-4.243-4.243"/>
+            </svg>
+            Customize Form Fields
+        `;
+        
+        formSettingsBtn.addEventListener('click', () => {
+            // Find the lead form section index
+            const leadFormIndex = state.sections.findIndex(s => s.type === 'lead-form');
+            if (leadFormIndex !== -1) {
+                formBuilder.open(leadFormIndex);
+            }
+        });
+        
+        formSettingsContainer.appendChild(formSettingsBtn);
+        sectionLibrary.appendChild(formSettingsContainer);
+    }
+    
+    // Update form settings button visibility
+    function updateFormSettingsVisibility() {
+        const formSettingsContainer = document.getElementById('formSettingsContainer');
+        if (formSettingsContainer) {
+            const hasLeadForm = state.sections.some(s => s.type === 'lead-form');
+            formSettingsContainer.style.display = hasLeadForm ? 'block' : 'none';
+        }
     }
 
     // Delete all sections with confirmation

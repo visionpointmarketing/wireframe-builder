@@ -102,6 +102,114 @@
         </div>
     </div>
 
+    <!-- Form Builder Modal -->
+    <div class="modal-backdrop" id="formBuilderBackdrop" style="display: none;">
+        <div class="modal-container form-builder-modal">
+            <div class="modal-header">
+                <h2>Customize Lead Generation Form</h2>
+                <button class="modal-close" id="closeFormBuilder" aria-label="Close form builder">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-builder-layout">
+                    <!-- Left Panel: Fields List -->
+                    <div class="form-builder-fields">
+                        <div class="fields-header">
+                            <h3>Form Fields</h3>
+                            <button class="btn btn-primary btn-sm" id="addFieldBtn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 5v14M5 12h14"/>
+                                </svg>
+                                Add Field
+                            </button>
+                        </div>
+                        
+                        <div class="fields-list" id="formFieldsList">
+                            <!-- Fields will be dynamically added here -->
+                        </div>
+                        
+                        <!-- Field Type Selector (initially hidden) -->
+                        <div class="field-type-selector" id="fieldTypeSelector" style="display: none;">
+                            <h4>Select Field Type</h4>
+                            <div class="field-type-grid">
+                                <button class="field-type-btn" data-type="text">
+                                    <span class="field-type-icon">Aa</span>
+                                    <span>Text Input</span>
+                                </button>
+                                <button class="field-type-btn" data-type="email">
+                                    <span class="field-type-icon">@</span>
+                                    <span>Email</span>
+                                </button>
+                                <button class="field-type-btn" data-type="tel">
+                                    <span class="field-type-icon">📱</span>
+                                    <span>Phone</span>
+                                </button>
+                                <button class="field-type-btn" data-type="number">
+                                    <span class="field-type-icon">#</span>
+                                    <span>Number</span>
+                                </button>
+                                <button class="field-type-btn" data-type="date">
+                                    <span class="field-type-icon">📅</span>
+                                    <span>Date</span>
+                                </button>
+                                <button class="field-type-btn" data-type="select">
+                                    <span class="field-type-icon">▼</span>
+                                    <span>Dropdown</span>
+                                </button>
+                                <button class="field-type-btn" data-type="radio">
+                                    <span class="field-type-icon">◉</span>
+                                    <span>Radio</span>
+                                </button>
+                                <button class="field-type-btn" data-type="checkbox">
+                                    <span class="field-type-icon">☑</span>
+                                    <span>Checkbox</span>
+                                </button>
+                                <button class="field-type-btn" data-type="textarea">
+                                    <span class="field-type-icon">¶</span>
+                                    <span>Textarea</span>
+                                </button>
+                                <button class="field-type-btn" data-type="consent">
+                                    <span class="field-type-icon">✓</span>
+                                    <span>Consent</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Panel: Field Properties -->
+                    <div class="form-builder-properties">
+                        <h3>Field Properties</h3>
+                        <div class="properties-content" id="fieldProperties">
+                            <div class="empty-properties">
+                                <p>Select a field to edit its properties</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Templates -->
+                <div class="form-templates">
+                    <h4>Quick Start Templates</h4>
+                    <div class="template-buttons">
+                        <button class="template-btn" data-template="basic">Basic Contact</button>
+                        <button class="template-btn" data-template="event">Event Registration</button>
+                        <button class="template-btn" data-template="inquiry">Program Inquiry</button>
+                        <button class="template-btn" data-template="newsletter">Newsletter Signup</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelFormBuilder">Cancel</button>
+                <button class="btn btn-primary" id="saveFormBuilder">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <!-- html2canvas library for image export -->
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" 
             integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" 
