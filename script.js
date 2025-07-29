@@ -1312,16 +1312,16 @@
             this.formFields = [];
             
             this.fieldTypes = {
-                text: { label: 'Text Input', icon: 'Aa', defaultLabel: 'Text Field' },
-                email: { label: 'Email', icon: '@', defaultLabel: 'Email Address' },
-                tel: { label: 'Phone', icon: '📱', defaultLabel: 'Phone Number' },
-                number: { label: 'Number', icon: '#', defaultLabel: 'Number' },
-                date: { label: 'Date', icon: '📅', defaultLabel: 'Date' },
-                select: { label: 'Dropdown', icon: '▼', defaultLabel: 'Select Option' },
-                radio: { label: 'Radio', icon: '◉', defaultLabel: 'Radio Group' },
-                checkbox: { label: 'Checkbox', icon: '☑', defaultLabel: 'Checkbox' },
-                textarea: { label: 'Textarea', icon: '¶', defaultLabel: 'Comments' },
-                consent: { label: 'Consent', icon: '✓', defaultLabel: 'I agree to the terms' }
+                text: { label: 'Text Input', defaultLabel: 'Text Field' },
+                email: { label: 'Email', defaultLabel: 'Email Address' },
+                tel: { label: 'Phone', defaultLabel: 'Phone Number' },
+                number: { label: 'Number', defaultLabel: 'Number' },
+                date: { label: 'Date', defaultLabel: 'Date' },
+                select: { label: 'Dropdown', defaultLabel: 'Select Option' },
+                radio: { label: 'Radio', defaultLabel: 'Radio Group' },
+                checkbox: { label: 'Checkbox', defaultLabel: 'Checkbox' },
+                textarea: { label: 'Textarea', defaultLabel: 'Comments' },
+                consent: { label: 'Consent', defaultLabel: 'I agree to the terms' }
             };
             
             this.templates = {
