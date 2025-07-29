@@ -310,7 +310,7 @@
                         { id: 'field_default_4', label: 'Phone', type: 'tel', required: false },
                         { id: 'field_default_5', label: 'Birth Date', type: 'date', required: false }
                     ],
-                    submitText: 'Send'
+                    submitText: 'Submit'
                 };
                 const data = { ...defaults, ...content };
                 
@@ -798,6 +798,20 @@
         const template = sectionTemplates[type];
         if (!template) return;
 
+        // For lead-form sections, ensure default fields are included
+        if (type === 'lead-form' && !content.fields) {
+            content = {
+                ...content,
+                fields: [
+                    { id: 'field_default_1', label: 'First Name', type: 'text', required: true },
+                    { id: 'field_default_2', label: 'Last Name', type: 'text', required: true },
+                    { id: 'field_default_3', label: 'Email', type: 'email', required: true },
+                    { id: 'field_default_4', label: 'Phone', type: 'tel', required: false },
+                    { id: 'field_default_5', label: 'Birth Date', type: 'date', required: false }
+                ]
+            };
+        }
+
         const sectionData = {
             id: Date.now(),
             type,
@@ -1169,7 +1183,7 @@
                         variant: section.variant,
                         content: [
                             { label: 'Eyebrow', value: content.eyebrow || '' },
-                            { label: 'Title', value: content.title || '' },
+                            { label: 'Headline', value: content.title || '' },
                             { label: 'Body', value: content.body || '' },
                             { label: 'CTA Text', value: content.ctaText || '' }
                         ]
@@ -1181,7 +1195,7 @@
                         variant: section.variant,
                         content: [
                             { label: 'Eyebrow', value: content.eyebrow || '' },
-                            { label: 'Title', value: content.title || '' },
+                            { label: 'Headline', value: content.title || '' },
                             { label: 'Body', value: content.body || '' },
                             { label: 'CTA Text', value: content.ctaText || '' }
                         ]
@@ -1193,11 +1207,11 @@
                         variant: section.variant,
                         content: [
                             { label: 'Eyebrow', value: content.eyebrow || '' },
-                            { label: 'Title', value: content.title || '' },
+                            { label: 'Headline', value: content.title || '' },
                             { label: 'Subtitle', value: content.subtitle || '' },
                             ...(content.columns || []).map((col, i) => ({
                                 label: `Column ${i + 1}`,
-                                value: `Title: ${col.title}\nDescription: ${col.description}`
+                                value: `Headline: ${col.title}\nSubhead: ${col.description}`
                             })),
                             { label: 'CTA Text', value: content.ctaText || '' }
                         ]
@@ -1209,7 +1223,7 @@
                         variant: section.variant,
                         content: [
                             { label: 'Eyebrow', value: content.eyebrow || '' },
-                            { label: 'Title', value: content.title || '' },
+                            { label: 'Headline', value: content.title || '' },
                             { label: 'Subtitle', value: content.subtitle || '' },
                             ...(content.stats || []).map((stat, i) => ({
                                 label: `Stat ${i + 1}`,
@@ -1225,11 +1239,11 @@
                         variant: section.variant,
                         content: [
                             { label: 'Eyebrow', value: content.eyebrow || '' },
-                            { label: 'Title', value: content.title || '' },
+                            { label: 'Headline', value: content.title || '' },
                             { label: 'Subtitle', value: content.subtitle || '' },
                             ...(content.programs || []).map((prog, i) => ({
                                 label: `Program ${i + 1}`,
-                                value: `Title: ${prog.title}\nDescription: ${prog.description}`
+                                value: `Headline: ${prog.title}\nSubhead: ${prog.description}`
                             })),
                             { label: 'CTA Text', value: content.ctaText || '' }
                         ]
@@ -1238,23 +1252,41 @@
                 case 'lead-form':
                     const formContent = [
                         { label: 'Eyebrow', value: content.eyebrow || '' },
-                        { label: 'Title', value: content.title || '' },
-                        { label: 'Description', value: content.description || '' }
+                        { label: 'Headline', value: content.title || '' },
+                        { label: 'Subhead', value: content.description || '' }
                     ];
+                    
+                    // Always add form fields section header
+                    formContent.push({ label: '', value: '' }); // Empty line
+                    formContent.push({ label: 'Form Fields', value: '' });
                     
                     // Add detailed field information
                     if (content.fields && content.fields.length > 0) {
-                        formContent.push({ label: 'Form Fields', value: '' });
                         content.fields.forEach((field, index) => {
-                            let fieldInfo = `  ${index + 1}. ${field.label} (${field.type})`;
-                            if (field.required) fieldInfo += ' *Required';
+                            let fieldInfo = `${field.label} (${field.type})`;
+                            if (field.required) fieldInfo += ' - Required';
                             if (field.placeholder) fieldInfo += ` - Placeholder: "${field.placeholder}"`;
-                            if (field.options) fieldInfo += ` - Options: ${field.options.join(', ')}`;
-                            formContent.push({ label: '', value: fieldInfo });
+                            if (field.options && field.options.length > 0) fieldInfo += ` - Options: ${field.options.join(', ')}`;
+                            formContent.push({ label: `  Field ${index + 1}`, value: fieldInfo });
+                        });
+                    } else {
+                        // If no fields, add default fields
+                        const defaultFields = [
+                            { label: 'First Name', type: 'text', required: true },
+                            { label: 'Last Name', type: 'text', required: true },
+                            { label: 'Email', type: 'email', required: true },
+                            { label: 'Phone', type: 'tel', required: false },
+                            { label: 'Birth Date', type: 'date', required: false }
+                        ];
+                        defaultFields.forEach((field, index) => {
+                            let fieldInfo = `${field.label} (${field.type})`;
+                            if (field.required) fieldInfo += ' - Required';
+                            formContent.push({ label: `  Field ${index + 1}`, value: fieldInfo });
                         });
                     }
                     
-                    formContent.push({ label: 'Submit Button', value: content.submitText || '' });
+                    formContent.push({ label: '', value: '' }); // Empty line
+                    formContent.push({ label: 'Submit Button', value: content.submitText || 'Submit' });
                     
                     return {
                         type: 'Lead Generation Form',
@@ -1268,7 +1300,7 @@
                         variant: section.variant,
                         content: [
                             { label: 'Eyebrow', value: content.eyebrow || '' },
-                            { label: 'Title', value: content.title || '' },
+                            { label: 'Headline', value: content.title || '' },
                             { label: 'Quote', value: content.quote || '' },
                             { label: 'Name', value: content.name || '' },
                             { label: 'Role', value: content.role || '' }
@@ -1281,7 +1313,7 @@
                         variant: section.variant,
                         content: [
                             { label: 'Eyebrow', value: content.eyebrow || '' },
-                            { label: 'Title', value: content.title || '' },
+                            { label: 'Headline', value: content.title || '' },
                             { label: 'Testimonial Quote', value: content['testimonial-quote-0'] || '' },
                             { label: 'Testimonial Name', value: content['testimonial-name-0'] || '' },
                             { label: 'Testimonial Role', value: content['testimonial-role-0'] || '' }
@@ -1924,7 +1956,7 @@
             idealChars: 12,
             tips: [
                 'Keep form buttons concise',
-                'Good examples: "Send", "Submit", "Get Info"',
+                'Good examples: "Submit", "Get Started", "Get Info"',
                 'Match button text to form purpose',
                 'Ensure mobile tap targets are 44px+'
             ]
