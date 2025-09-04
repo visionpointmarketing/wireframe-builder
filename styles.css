@@ -273,6 +273,17 @@ body {
     margin: 0 auto;
 }
 
+/* Responsive section container widths */
+.canvas.tablet .section-container {
+    max-width: 100%;
+    padding: 0 1.5rem;
+}
+
+.canvas.mobile .section-container {
+    max-width: 100%;
+    padding: 0 1rem;
+}
+
 .section-header {
     text-align: center;
     margin-bottom: 3rem;
@@ -848,6 +859,7 @@ body {
 .canvas.tablet .form-layout {
     grid-template-columns: 1fr;
     gap: 2rem;
+    width: 100%;
 }
 
 .canvas.tablet .form-image {
@@ -877,6 +889,7 @@ body {
 .canvas.mobile .form-layout {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+    width: 100%;
 }
 
 .canvas.mobile .form-image {
@@ -1381,11 +1394,20 @@ body {
 
 .field-item.dragging {
     opacity: 0.5;
+    background: #f8f9fa;
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: none;
 }
 
 .field-drag-handle {
-    cursor: move;
+    cursor: grab;
     color: var(--text-gray);
+    user-select: none;
+}
+
+.field-drag-handle:active {
+    cursor: grabbing;
 }
 
 .field-info {

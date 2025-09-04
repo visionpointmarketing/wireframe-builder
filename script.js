@@ -18,6 +18,13 @@
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
     };
+    
+    // Unescape HTML entities for export
+    const unescapeHtml = (safe) => {
+        const temp = document.createElement('div');
+        temp.innerHTML = safe;
+        return temp.textContent || temp.innerText || '';
+    };
 
     // State management
     const state = {
@@ -351,14 +358,14 @@
                                                     fieldHtml += `<option value="">Select...</option>`;
                                                     if (field.options) {
                                                         field.options.forEach(option => {
-                                                            fieldHtml += `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`;
+                                                            fieldHtml += `<option value="${option}">${option}</option>`;
                                                         });
                                                     }
                                                     fieldHtml += `</select>`;
                                                     break;
                                                     
                                                 case 'textarea':
-                                                    fieldHtml += `<textarea id="field-${i}" placeholder="${escapeHtml(field.placeholder || field.label)}" rows="${field.rows || 4}" ${field.required ? 'required' : ''} aria-required="${field.required}"></textarea>`;
+                                                    fieldHtml += `<textarea id="field-${i}" placeholder="${field.placeholder || field.label}" rows="${field.rows || 4}" ${field.required ? 'required' : ''} aria-required="${field.required}"></textarea>`;
                                                     break;
                                                     
                                                 case 'radio':
@@ -367,8 +374,8 @@
                                                         field.options.forEach((option, optIndex) => {
                                                             fieldHtml += `
                                                                 <label class="radio-label">
-                                                                    <input type="radio" name="field-${i}" value="${escapeHtml(option)}" ${field.required && optIndex === 0 ? 'required' : ''}>
-                                                                    ${escapeHtml(option)}
+                                                                    <input type="radio" name="field-${i}" value="${option}" ${field.required && optIndex === 0 ? 'required' : ''}>
+                                                                    ${option}
                                                                 </label>
                                                             `;
                                                         });
@@ -382,8 +389,8 @@
                                                         field.options.forEach((option) => {
                                                             fieldHtml += `
                                                                 <label class="checkbox-label">
-                                                                    <input type="checkbox" name="field-${i}" value="${escapeHtml(option)}">
-                                                                    ${escapeHtml(option)}
+                                                                    <input type="checkbox" name="field-${i}" value="${option}">
+                                                                    ${option}
                                                                 </label>
                                                             `;
                                                         });
@@ -411,7 +418,7 @@
                                                     
                                                 default:
                                                     // Standard input types (text, email, tel, number, date)
-                                                    fieldHtml += `<input type="${field.type}" id="field-${i}" placeholder="${escapeHtml(field.placeholder || field.label)}" ${field.required ? 'required' : ''} aria-required="${field.required}"`;
+                                                    fieldHtml += `<input type="${field.type}" id="field-${i}" placeholder="${field.placeholder || field.label}" ${field.required ? 'required' : ''} aria-required="${field.required}"`;
                                                     if (field.type === 'number' && field.min !== null) fieldHtml += ` min="${field.min}"`;
                                                     if (field.type === 'number' && field.max !== null) fieldHtml += ` max="${field.max}"`;
                                                     fieldHtml += '>';
@@ -856,7 +863,8 @@
         sections.forEach((section, index) => {
             if (!state.sections[index]) return;
             
-            const content = {};
+            // Start with existing content to preserve non-editable data like form fields
+            const content = { ...state.sections[index].content };
             const editables = section.querySelectorAll('[contenteditable="true"]');
             
             editables.forEach(editable => {
@@ -905,6 +913,11 @@
                         });
                     }
                 }
+            }
+            
+            // Preserve form fields for lead-form sections
+            if (state.sections[index].type === 'lead-form' && state.sections[index].content.fields) {
+                content.fields = state.sections[index].content.fields;
             }
             
             state.sections[index].content = content;
@@ -1263,10 +1276,15 @@
                     // Add detailed field information
                     if (content.fields && content.fields.length > 0) {
                         content.fields.forEach((field, index) => {
-                            let fieldInfo = `${field.label} (${field.type})`;
+                            // Unescape HTML entities for proper display in Google Docs
+                            const cleanLabel = unescapeHtml(field.label || '');
+                            const cleanPlaceholder = field.placeholder ? unescapeHtml(field.placeholder) : '';
+                            const cleanOptions = field.options ? field.options.map(opt => unescapeHtml(opt)) : [];
+                            
+                            let fieldInfo = `${cleanLabel} (${field.type})`;
                             if (field.required) fieldInfo += ' - Required';
-                            if (field.placeholder) fieldInfo += ` - Placeholder: "${field.placeholder}"`;
-                            if (field.options && field.options.length > 0) fieldInfo += ` - Options: ${field.options.join(', ')}`;
+                            if (cleanPlaceholder) fieldInfo += ` - Placeholder: "${cleanPlaceholder}"`;
+                            if (cleanOptions.length > 0) fieldInfo += ` - Options: ${cleanOptions.join(', ')}`;
                             formContent.push({ label: `  Field ${index + 1}`, value: fieldInfo });
                         });
                     } else {
@@ -1764,51 +1782,81 @@
             this.fieldsList.querySelectorAll('.field-item').forEach((item, index) => {
                 const handle = item.querySelector('.field-drag-handle');
                 
-                handle.addEventListener('mousedown', (e) => {
+                // Only the handle should initiate drag
+                handle.style.cursor = 'grab';
+                
+                // Make handle draggable, not the entire item
+                handle.draggable = true;
+                
+                handle.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.effectAllowed = 'move';
+                    // Store reference to the parent field-item
                     draggedElement = item;
-                    draggedIndex = index;
-                    item.style.cursor = 'grabbing';
+                    draggedIndex = parseInt(item.dataset.index);
+                    item.classList.add('dragging');
+                    // Set drag image to the entire field item
+                    e.dataTransfer.setDragImage(item, 0, 0);
                 });
                 
-                item.addEventListener('dragstart', (e) => {
-                    if (e.target.closest('.field-drag-handle')) {
-                        e.dataTransfer.effectAllowed = 'move';
-                        draggedElement = item;
-                        draggedIndex = parseInt(item.dataset.index);
-                        item.classList.add('dragging');
-                    } else {
-                        e.preventDefault();
+                handle.addEventListener('dragend', () => {
+                    if (draggedElement) {
+                        draggedElement.classList.remove('dragging');
+                        draggedElement = null;
+                        
+                        // Update field order based on new DOM positions
+                        const newOrder = Array.from(this.fieldsList.querySelectorAll('.field-item')).map(el => 
+                            this.formFields.find(f => f.id === el.dataset.fieldId)
+                        ).filter(Boolean); // Filter out any undefined values
+                        this.formFields = newOrder;
                     }
                 });
                 
+                // Handle visual feedback on mouse interactions
+                handle.addEventListener('mousedown', () => {
+                    handle.style.cursor = 'grabbing';
+                });
+                
+                handle.addEventListener('mouseup', () => {
+                    handle.style.cursor = 'grab';
+                });
+                
+                handle.addEventListener('mouseleave', () => {
+                    handle.style.cursor = 'grab';
+                });
+                
+                // Set up drop zone on the item
                 item.addEventListener('dragover', (e) => {
                     e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    
                     const draggingItem = this.fieldsList.querySelector('.dragging');
                     if (!draggingItem || draggingItem === item) return;
                     
-                    const rect = item.getBoundingClientRect();
-                    const midpoint = rect.top + rect.height / 2;
+                    // Get all items except the one being dragged
+                    const siblings = [...this.fieldsList.querySelectorAll('.field-item:not(.dragging)')];
                     
-                    if (e.clientY < midpoint) {
-                        item.parentNode.insertBefore(draggingItem, item);
+                    // Find the item after which the dragging item should be inserted
+                    const nextSibling = siblings.find(sibling => {
+                        const rect = sibling.getBoundingClientRect();
+                        const midpoint = rect.top + rect.height / 2;
+                        return e.clientY < midpoint;
+                    });
+                    
+                    // Insert the dragging item at the appropriate position
+                    if (nextSibling) {
+                        this.fieldsList.insertBefore(draggingItem, nextSibling);
                     } else {
-                        item.parentNode.insertBefore(draggingItem, item.nextSibling);
+                        this.fieldsList.appendChild(draggingItem);
                     }
                 });
                 
-                item.addEventListener('dragend', () => {
-                    item.classList.remove('dragging');
-                    item.style.cursor = '';
-                    
-                    // Update field order
-                    const newOrder = Array.from(this.fieldsList.querySelectorAll('.field-item')).map(el => 
-                        this.formFields.find(f => f.id === el.dataset.fieldId)
-                    );
-                    this.formFields = newOrder;
+                // Prevent default drag behavior on the item itself
+                item.addEventListener('dragstart', (e) => {
+                    // Only allow drag if it originated from the handle
+                    if (!e.target.closest('.field-drag-handle')) {
+                        e.preventDefault();
+                    }
                 });
-                
-                // Make draggable
-                item.draggable = true;
             });
         }
     }
