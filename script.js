@@ -54,7 +54,7 @@
         'content-cta': {
             name: 'Content + CTA',
             variants: ['light', 'dark'],
-            render: (variant = 'light', content = {}) => {
+            render: (variant = 'light', content = {}, layoutDirection = null, visibility = {}) => {
                 const defaults = {
                     eyebrow: 'Why Choose Us',
                     title: 'Your Future Starts Here',
@@ -74,11 +74,11 @@
                     <div class="section content-cta ${variant}" data-section-type="content-cta">
                         <div class="section-container">
                             <div class="section-header">
-                                <div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>
-                                <h2 class="section-title editable" contenteditable="true" data-field="title">${data.title}</h2>
+                                ${renderIfVisible('eyebrow', `<div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>`, visibility)}
+                                ${renderIfVisible('title', `<h2 class="section-title editable" contenteditable="true" data-field="title">${data.title}</h2>`, visibility)}
                             </div>
-                            <div class="body-content editable" contenteditable="true" data-field="body">${data.body}</div>
-                            <a href="#" class="cta-button editable" contenteditable="true" data-field="ctaText">${data.ctaText}</a>
+                            ${renderIfVisible('body', `<div class="body-content editable" contenteditable="true" data-field="body">${data.body}</div>`, visibility)}
+                            ${renderIfVisible('ctaText', `<a href="#" class="cta-button editable" contenteditable="true" data-field="ctaText">${data.ctaText}</a>`, visibility)}
                         </div>
                         <div class="drag-handle" draggable="true" aria-label="Drag to reorder section">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
@@ -88,6 +88,13 @@
                         <div class="section-controls">
                             <button class="control-btn duplicate-btn" aria-label="Duplicate section">Duplicate</button>
                             <button class="control-btn variant-btn" aria-label="Toggle theme variant">Toggle Theme</button>
+                            <button class="control-btn customize-btn" aria-label="Customize elements">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                Customize
+                            </button>
                             <button class="control-btn delete delete-btn" aria-label="Delete section">Delete</button>
                         </div>
                     </div>
@@ -97,7 +104,7 @@
         'three-column': {
             name: 'Three Column Features',
             variants: ['light', 'dark'],
-            render: (variant = 'light', content = {}) => {
+            render: (variant = 'light', content = {}, layoutDirection = null, visibility = {}) => {
                 const defaults = {
                     eyebrow: 'Why Choose Us',
                     title: 'Built for Your Success',
@@ -135,9 +142,9 @@
                     <div class="section three-column ${variant}" data-section-type="three-column">
                         <div class="section-container">
                             <div class="section-header">
-                                <div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>
-                                <h2 class="section-title editable" contenteditable="true" data-field="title">${data.title}</h2>
-                                <p class="section-subtitle editable" contenteditable="true" data-field="subtitle">${data.subtitle}</p>
+                                ${renderIfVisible('eyebrow', `<div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>`, visibility)}
+                                ${renderIfVisible('title', `<h2 class="section-title editable" contenteditable="true" data-field="title">${data.title}</h2>`, visibility)}
+                                ${renderIfVisible('subtitle', `<p class="section-subtitle editable" contenteditable="true" data-field="subtitle">${data.subtitle}</p>`, visibility)}
                             </div>
                             <div class="three-column-grid">
                                 ${data.columns.map((col, i) => `
@@ -148,9 +155,9 @@
                                     </div>
                                 `).join('')}
                             </div>
-                            <div style="text-align: center;">
+                            ${renderIfVisible('ctaText', `<div style="text-align: center;">
                                 <a href="#" class="cta-button editable" contenteditable="true" data-field="ctaText">${data.ctaText}</a>
-                            </div>
+                            </div>`, visibility)}
                         </div>
                         <div class="drag-handle" draggable="true" aria-label="Drag to reorder section">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
@@ -160,6 +167,13 @@
                         <div class="section-controls">
                             <button class="control-btn duplicate-btn" aria-label="Duplicate section">Duplicate</button>
                             <button class="control-btn variant-btn" aria-label="Toggle theme variant">Toggle Theme</button>
+                            <button class="control-btn customize-btn" aria-label="Customize elements">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                Customize
+                            </button>
                             <button class="control-btn delete delete-btn" aria-label="Delete section">Delete</button>
                         </div>
                     </div>
@@ -169,7 +183,7 @@
         'statistics': {
             name: 'Statistics/Numbers',
             variants: ['light', 'dark'],
-            render: (variant = 'light', content = {}) => {
+            render: (variant = 'light', content = {}, layoutDirection = null, visibility = {}) => {
                 const defaults = {
                     eyebrow: 'Our Impact',
                     title: 'Success by the Numbers',
@@ -198,9 +212,9 @@
                     <div class="section statistics ${variant}" data-section-type="statistics">
                         <div class="section-container">
                             <div class="section-header">
-                                <div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>
-                                <h2 class="section-title editable" contenteditable="true" data-field="title">${data.title}</h2>
-                                <p class="section-subtitle editable" contenteditable="true" data-field="subtitle">${data.subtitle}</p>
+                                ${renderIfVisible('eyebrow', `<div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>`, visibility)}
+                                ${renderIfVisible('title', `<h2 class="section-title editable" contenteditable="true" data-field="title">${data.title}</h2>`, visibility)}
+                                ${renderIfVisible('subtitle', `<p class="section-subtitle editable" contenteditable="true" data-field="subtitle">${data.subtitle}</p>`, visibility)}
                             </div>
                             <div class="stats-grid">
                                 ${data.stats.map((stat, i) => `
@@ -210,9 +224,9 @@
                                     </div>
                                 `).join('')}
                             </div>
-                            <div style="text-align: center; margin-top: 2rem;">
+                            ${renderIfVisible('ctaText', `<div style="text-align: center; margin-top: 2rem;">
                                 <a href="#" class="cta-button editable" contenteditable="true" data-field="ctaText">${data.ctaText}</a>
-                            </div>
+                            </div>`, visibility)}
                         </div>
                         <div class="drag-handle" draggable="true" aria-label="Drag to reorder section">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
@@ -222,6 +236,13 @@
                         <div class="section-controls">
                             <button class="control-btn duplicate-btn" aria-label="Duplicate section">Duplicate</button>
                             <button class="control-btn variant-btn" aria-label="Toggle theme variant">Toggle Theme</button>
+                            <button class="control-btn customize-btn" aria-label="Customize elements">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                Customize
+                            </button>
                             <button class="control-btn delete delete-btn" aria-label="Delete section">Delete</button>
                         </div>
                     </div>
@@ -231,7 +252,7 @@
         'program-cards': {
             name: 'Program Cards',
             variants: ['light', 'dark'],
-            render: (variant = 'light', content = {}) => {
+            render: (variant = 'light', content = {}, layoutDirection = null, visibility = {}) => {
                 const defaults = {
                     eyebrow: 'Popular Programs',
                     title: 'Find Your Path to Success',
@@ -296,6 +317,13 @@
                         <div class="section-controls">
                             <button class="control-btn duplicate-btn" aria-label="Duplicate section">Duplicate</button>
                             <button class="control-btn variant-btn" aria-label="Toggle theme variant">Toggle Theme</button>
+                            <button class="control-btn customize-btn" aria-label="Customize elements">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                Customize
+                            </button>
                             <button class="control-btn delete delete-btn" aria-label="Delete section">Delete</button>
                         </div>
                     </div>
@@ -448,6 +476,13 @@
                             <button class="control-btn duplicate-btn" aria-label="Duplicate section">Duplicate</button>
                             <button class="control-btn variant-btn" aria-label="Toggle theme variant">Toggle Theme</button>
                             <button class="control-btn layout-btn" aria-label="Toggle layout direction">Toggle Layout</button>
+                            <button class="control-btn customize-btn" aria-label="Customize elements">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                Customize
+                            </button>
                             <button class="control-btn delete delete-btn" aria-label="Delete section">Delete</button>
                         </div>
                     </div>
@@ -457,7 +492,7 @@
         'testimonial-single': {
             name: 'Single Testimonial with Large Quote',
             variants: ['light', 'dark'],
-            render: (variant = 'light', content = {}) => {
+            render: (variant = 'light', content = {}, layoutDirection = null, visibility = {}) => {
                 const defaults = {
                     eyebrow: 'Student Success',
                     title: 'Real Stories, Real Results',
@@ -502,6 +537,13 @@
                         <div class="section-controls">
                             <button class="control-btn duplicate-btn" aria-label="Duplicate section">Duplicate</button>
                             <button class="control-btn variant-btn" aria-label="Toggle theme variant">Toggle Theme</button>
+                            <button class="control-btn customize-btn" aria-label="Customize elements">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                Customize
+                            </button>
                             <button class="control-btn delete delete-btn" aria-label="Delete section">Delete</button>
                         </div>
                     </div>
@@ -511,7 +553,7 @@
         'testimonial-carousel': {
             name: 'Testimonial Carousel',
             variants: ['light', 'dark'],
-            render: (variant = 'light', content = {}) => {
+            render: (variant = 'light', content = {}, layoutDirection = null, visibility = {}) => {
                 const defaults = {
                     eyebrow: 'Student Stories',
                     title: 'Hear from Our Graduates',
@@ -581,6 +623,13 @@
                         <div class="section-controls">
                             <button class="control-btn duplicate-btn" aria-label="Duplicate section">Duplicate</button>
                             <button class="control-btn variant-btn" aria-label="Toggle theme variant">Toggle Theme</button>
+                            <button class="control-btn customize-btn" aria-label="Customize elements">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                Customize
+                            </button>
                             <button class="control-btn delete delete-btn" aria-label="Delete section">Delete</button>
                         </div>
                     </div>
@@ -633,6 +682,13 @@
                             <button class="control-btn duplicate-btn" aria-label="Duplicate section">Duplicate</button>
                             <button class="control-btn variant-btn" aria-label="Toggle theme variant">Toggle Theme</button>
                             <button class="control-btn layout-btn" aria-label="Toggle layout direction">Toggle Layout</button>
+                            <button class="control-btn customize-btn" aria-label="Customize elements">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                Customize
+                            </button>
                             <button class="control-btn delete delete-btn" aria-label="Delete section">Delete</button>
                         </div>
                     </div>
@@ -640,6 +696,84 @@
             }
         }
     };
+
+    // Get default visibility settings for a section type
+    function getDefaultVisibility(sectionType) {
+        const commonFields = {
+            eyebrow: true,
+            title: true,
+            body: true,
+            ctaText: true
+        };
+        
+        switch(sectionType) {
+            case 'content-cta':
+            case 'image-content':
+                return { ...commonFields };
+                
+            case 'three-column':
+            case 'statistics':
+            case 'programs':
+                return {
+                    eyebrow: true,
+                    title: true,
+                    subtitle: true,
+                    ctaText: true
+                };
+                
+            case 'lead-form':
+                return {
+                    eyebrow: true,
+                    title: true,
+                    description: true,
+                    submitText: true
+                };
+                
+            case 'testimonial-single':
+                return {
+                    eyebrow: true,
+                    title: true,
+                    quote: true,
+                    name: true,
+                    role: true
+                };
+                
+            case 'testimonial-carousel':
+                return {
+                    eyebrow: true,
+                    title: true
+                };
+                
+            default:
+                return commonFields;
+        }
+    }
+    
+    // Get element labels for display in the popover
+    function getElementLabels(sectionType) {
+        const labels = {
+            eyebrow: 'Eyebrow Text',
+            title: 'Heading',
+            subtitle: 'Subtitle',
+            body: 'Body Content',
+            ctaText: 'CTA Button',
+            description: 'Description',
+            submitText: 'Submit Button',
+            quote: 'Testimonial Quote',
+            name: 'Author Name',
+            role: 'Author Role'
+        };
+        
+        return labels;
+    }
+    
+    // Helper function to conditionally render elements based on visibility
+    function renderIfVisible(field, html, visibility) {
+        if (!visibility || visibility[field] !== false) {
+            return html;
+        }
+        return '';
+    }
 
     // Event handling with proper delegation
     const eventHandlers = {
@@ -652,7 +786,8 @@
                 const duplicatedSection = {
                     ...originalSection,
                     id: Date.now(),
-                    content: { ...originalSection.content }
+                    content: { ...originalSection.content },
+                    visibility: originalSection.visibility ? { ...originalSection.visibility } : getDefaultVisibility(originalSection.type)
                 };
                 
                 state.sections.splice(index + 1, 0, duplicatedSection);
@@ -688,6 +823,109 @@
                 state.sections.splice(index, 1);
                 updateCanvas();
             }
+        },
+        
+        toggleCustomizePopover: function(btn) {
+            const section = btn.closest('.section');
+            const index = Array.from(canvas.querySelectorAll('.section')).indexOf(section);
+            
+            if (!state.sections[index]) return;
+            
+            // Check if popover already exists
+            let popover = btn.parentElement.querySelector('.visibility-popover');
+            
+            if (!popover) {
+                // Create popover
+                popover = document.createElement('div');
+                popover.className = 'visibility-popover';
+                
+                const sectionData = state.sections[index];
+                const visibility = sectionData.visibility || getDefaultVisibility(sectionData.type);
+                const labels = getElementLabels(sectionData.type);
+                
+                // Build popover content
+                let optionsHtml = '';
+                Object.keys(visibility).forEach(field => {
+                    if (labels[field]) {
+                        optionsHtml += `
+                            <div class="visibility-option">
+                                <input type="checkbox" id="vis-${index}-${field}" 
+                                       data-field="${field}" 
+                                       ${visibility[field] ? 'checked' : ''}>
+                                <label for="vis-${index}-${field}">${labels[field]}</label>
+                            </div>
+                        `;
+                    }
+                });
+                
+                popover.innerHTML = `
+                    <div class="visibility-popover-header">Show/Hide Elements</div>
+                    <div class="visibility-options">
+                        ${optionsHtml}
+                    </div>
+                    <div class="visibility-actions">
+                        <button class="visibility-action-btn show-all-btn">Show All</button>
+                        <button class="visibility-action-btn hide-all-btn">Hide All</button>
+                    </div>
+                `;
+                
+                // Add popover to the section controls container
+                btn.parentElement.appendChild(popover);
+                
+                // Add event listeners to checkboxes
+                popover.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.addEventListener('change', (e) => {
+                        const field = e.target.dataset.field;
+                        
+                        // Initialize visibility if it doesn't exist
+                        if (!state.sections[index].visibility) {
+                            state.sections[index].visibility = getDefaultVisibility(sectionData.type);
+                        }
+                        
+                        state.sections[index].visibility[field] = e.target.checked;
+                        updateCanvas();
+                    });
+                });
+                
+                // Show All button
+                popover.querySelector('.show-all-btn').addEventListener('click', () => {
+                    if (!state.sections[index].visibility) {
+                        state.sections[index].visibility = getDefaultVisibility(sectionData.type);
+                    }
+                    
+                    Object.keys(state.sections[index].visibility).forEach(field => {
+                        state.sections[index].visibility[field] = true;
+                    });
+                    
+                    popover.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                        checkbox.checked = true;
+                    });
+                    
+                    updateCanvas();
+                });
+                
+                // Hide All button
+                popover.querySelector('.hide-all-btn').addEventListener('click', () => {
+                    if (!state.sections[index].visibility) {
+                        state.sections[index].visibility = getDefaultVisibility(sectionData.type);
+                    }
+                    
+                    // Keep title visible as it's usually required
+                    Object.keys(state.sections[index].visibility).forEach(field => {
+                        state.sections[index].visibility[field] = field === 'title';
+                    });
+                    
+                    popover.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                        const field = checkbox.dataset.field;
+                        checkbox.checked = field === 'title';
+                    });
+                    
+                    updateCanvas();
+                });
+            }
+            
+            // Toggle active state
+            popover.classList.toggle('active');
         }
     };
 
@@ -778,8 +1016,20 @@
                 eventHandlers.toggleVariant(e.target);
             } else if (e.target.classList.contains('layout-btn')) {
                 eventHandlers.toggleLayout(e.target);
+            } else if (e.target.classList.contains('customize-btn') || e.target.closest('.customize-btn')) {
+                const btn = e.target.closest('.customize-btn') || e.target;
+                eventHandlers.toggleCustomizePopover(btn);
             } else if (e.target.classList.contains('delete-btn')) {
                 eventHandlers.deleteSection(e.target);
+            }
+        });
+        
+        // Close popovers when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.visibility-popover') && !e.target.closest('.customize-btn')) {
+                document.querySelectorAll('.visibility-popover').forEach(popover => {
+                    popover.classList.remove('active');
+                });
             }
         });
 
@@ -823,7 +1073,8 @@
             id: Date.now(),
             type,
             variant,
-            content
+            content,
+            visibility: getDefaultVisibility(type) // Add default visibility settings
         };
         
         // Add layoutDirection for sections that support it
@@ -845,7 +1096,8 @@
 
         const wireframeHtml = state.sections.map(section => {
             const template = sectionTemplates[section.type];
-            return template ? template.render(section.variant, section.content, section.layoutDirection) : '';
+            const visibility = section.visibility || getDefaultVisibility(section.type);
+            return template ? template.render(section.variant, section.content, section.layoutDirection, visibility) : '';
         }).join('');
 
         canvas.innerHTML = `<div class="wireframe-container">${wireframeHtml}</div>`;
@@ -1188,6 +1440,15 @@
         formatSectionContent(section) {
             const type = section.type;
             const content = section.content || {};
+            const visibility = section.visibility || getDefaultVisibility(section.type);
+            
+            // Helper to filter out hidden fields
+            const includeIfVisible = (field, label, value) => {
+                if (visibility[field] !== false && value) {
+                    return { label, value };
+                }
+                return null;
+            };
             
             switch (type) {
                 case 'content-cta':
@@ -1195,11 +1456,11 @@
                         type: 'Content + CTA',
                         variant: section.variant,
                         content: [
-                            { label: 'Eyebrow', value: content.eyebrow || '' },
-                            { label: 'Headline', value: content.title || '' },
-                            { label: 'Body', value: content.body || '' },
-                            { label: 'CTA Text', value: content.ctaText || '' }
-                        ]
+                            includeIfVisible('eyebrow', 'Eyebrow', content.eyebrow),
+                            includeIfVisible('title', 'Headline', content.title),
+                            includeIfVisible('body', 'Body', content.body),
+                            includeIfVisible('ctaText', 'CTA Text', content.ctaText)
+                        ].filter(Boolean) // Remove null entries
                     };
                     
                 case 'image-content':
@@ -1207,11 +1468,11 @@
                         type: 'Image + Content',
                         variant: section.variant,
                         content: [
-                            { label: 'Eyebrow', value: content.eyebrow || '' },
-                            { label: 'Headline', value: content.title || '' },
-                            { label: 'Body', value: content.body || '' },
-                            { label: 'CTA Text', value: content.ctaText || '' }
-                        ]
+                            includeIfVisible('eyebrow', 'Eyebrow', content.eyebrow),
+                            includeIfVisible('title', 'Headline', content.title),
+                            includeIfVisible('body', 'Body', content.body),
+                            includeIfVisible('ctaText', 'CTA Text', content.ctaText)
+                        ].filter(Boolean)
                     };
                     
                 case 'three-column':
@@ -1219,15 +1480,15 @@
                         type: 'Three Column Features',
                         variant: section.variant,
                         content: [
-                            { label: 'Eyebrow', value: content.eyebrow || '' },
-                            { label: 'Headline', value: content.title || '' },
-                            { label: 'Subtitle', value: content.subtitle || '' },
+                            includeIfVisible('eyebrow', 'Eyebrow', content.eyebrow),
+                            includeIfVisible('title', 'Headline', content.title),
+                            includeIfVisible('subtitle', 'Subtitle', content.subtitle),
                             ...(content.columns || []).map((col, i) => ({
                                 label: `Column ${i + 1}`,
                                 value: `Headline: ${col.title}\nSubhead: ${col.description}`
                             })),
-                            { label: 'CTA Text', value: content.ctaText || '' }
-                        ]
+                            includeIfVisible('ctaText', 'CTA Text', content.ctaText)
+                        ].filter(Boolean)
                     };
                     
                 case 'statistics':
@@ -1235,15 +1496,15 @@
                         type: 'Statistics/Numbers',
                         variant: section.variant,
                         content: [
-                            { label: 'Eyebrow', value: content.eyebrow || '' },
-                            { label: 'Headline', value: content.title || '' },
-                            { label: 'Subtitle', value: content.subtitle || '' },
+                            includeIfVisible('eyebrow', 'Eyebrow', content.eyebrow),
+                            includeIfVisible('title', 'Headline', content.title),
+                            includeIfVisible('subtitle', 'Subtitle', content.subtitle),
                             ...(content.stats || []).map((stat, i) => ({
                                 label: `Stat ${i + 1}`,
                                 value: `${stat.number} - ${stat.label}`
                             })),
-                            { label: 'CTA Text', value: content.ctaText || '' }
-                        ]
+                            includeIfVisible('ctaText', 'CTA Text', content.ctaText)
+                        ].filter(Boolean)
                     };
                     
                 case 'program-cards':
@@ -1264,10 +1525,10 @@
                     
                 case 'lead-form':
                     const formContent = [
-                        { label: 'Eyebrow', value: content.eyebrow || '' },
-                        { label: 'Headline', value: content.title || '' },
-                        { label: 'Subhead', value: content.description || '' }
-                    ];
+                        includeIfVisible('eyebrow', 'Eyebrow', content.eyebrow),
+                        includeIfVisible('title', 'Headline', content.title),
+                        includeIfVisible('description', 'Subhead', content.description)
+                    ].filter(Boolean);
                     
                     // Always add form fields section header
                     formContent.push({ label: '', value: '' }); // Empty line
@@ -1317,12 +1578,12 @@
                         type: 'Single Testimonial',
                         variant: section.variant,
                         content: [
-                            { label: 'Eyebrow', value: content.eyebrow || '' },
-                            { label: 'Headline', value: content.title || '' },
-                            { label: 'Quote', value: content.quote || '' },
-                            { label: 'Name', value: content.name || '' },
-                            { label: 'Role', value: content.role || '' }
-                        ]
+                            includeIfVisible('eyebrow', 'Eyebrow', content.eyebrow),
+                            includeIfVisible('title', 'Headline', content.title),
+                            includeIfVisible('quote', 'Quote', content.quote),
+                            includeIfVisible('name', 'Name', content.name),
+                            includeIfVisible('role', 'Role', content.role)
+                        ].filter(Boolean)
                     };
                     
                 case 'testimonial-carousel':
@@ -1330,12 +1591,12 @@
                         type: 'Testimonial Carousel',
                         variant: section.variant,
                         content: [
-                            { label: 'Eyebrow', value: content.eyebrow || '' },
-                            { label: 'Headline', value: content.title || '' },
+                            includeIfVisible('eyebrow', 'Eyebrow', content.eyebrow),
+                            includeIfVisible('title', 'Headline', content.title),
                             { label: 'Testimonial Quote', value: content['testimonial-quote-0'] || '' },
                             { label: 'Testimonial Name', value: content['testimonial-name-0'] || '' },
                             { label: 'Testimonial Role', value: content['testimonial-role-0'] || '' }
-                        ]
+                        ].filter(Boolean)
                     };
                     
                 default:

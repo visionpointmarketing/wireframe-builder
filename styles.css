@@ -571,6 +571,118 @@ body {
     border-color: #DC2626;
 }
 
+.control-btn.customize-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.control-btn.customize-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Element Visibility Popover */
+.visibility-popover {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 220px;
+    max-width: 280px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+}
+
+.visibility-popover.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.visibility-popover::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 4rem;
+    width: 12px;
+    height: 12px;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-right: none;
+    border-bottom: none;
+    transform: rotate(45deg);
+}
+
+.visibility-popover-header {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.visibility-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.visibility-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    transition: background 0.2s;
+}
+
+.visibility-option:hover {
+    background: var(--light-gray);
+}
+
+.visibility-option input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.visibility-option label {
+    cursor: pointer;
+    flex: 1;
+    user-select: none;
+}
+
+.visibility-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.visibility-action-btn {
+    flex: 1;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.visibility-action-btn:hover {
+    background: var(--light-gray);
+}
+
 /* Statistics Section */
 .stats-grid {
     display: grid;
