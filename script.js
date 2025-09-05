@@ -35,19 +35,29 @@
         maxHistorySize: 50
     };
 
-    // DOM elements
-    const canvas = document.getElementById('canvas');
-    const sectionLibrary = document.querySelector('.section-library');
-    const viewportBtns = document.querySelectorAll('.viewport-btn');
-    const exportBtn = document.getElementById('exportBtn');
-    const importBtn = document.getElementById('importBtn');
-    const importFile = document.getElementById('importFile');
-    const exportImageBtn = document.getElementById('exportImageBtn');
-    const deleteAllBtn = document.getElementById('deleteAllBtn');
-    const undoBtn = document.getElementById('undoBtn');
-    const redoBtn = document.getElementById('redoBtn');
-    const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
-    const sidebar = document.querySelector('.sidebar');
+    // DOM elements - will be initialized after DOM is ready
+    let canvas, sectionLibrary, viewportBtns, exportDropdownBtn, exportMenu;
+    let exportBtn, importBtn, importFile, exportImageBtn, googleDocsExportBtn;
+    let deleteAllBtn, undoBtn, redoBtn, toggleSidebarBtn, sidebar;
+    
+    // Initialize DOM elements
+    function initializeDOMElements() {
+        canvas = document.getElementById('canvas');
+        sectionLibrary = document.querySelector('.sidebar-content') || document.querySelector('.section-library');
+        viewportBtns = document.querySelectorAll('.viewport-btn');
+        exportDropdownBtn = document.getElementById('exportDropdownBtn');
+        exportMenu = document.getElementById('exportMenu');
+        exportBtn = document.getElementById('exportBtn');
+        importBtn = document.getElementById('importBtn');
+        importFile = document.getElementById('importFile');
+        exportImageBtn = document.getElementById('exportImageBtn');
+        googleDocsExportBtn = document.getElementById('googleDocsExportBtn');
+        deleteAllBtn = document.getElementById('deleteAllBtn');
+        undoBtn = document.getElementById('undoBtn');
+        redoBtn = document.getElementById('redoBtn');
+        toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+        sidebar = document.querySelector('.sidebar');
+    }
 
     // Section templates with secure rendering
     const sectionTemplates = {
@@ -290,9 +300,9 @@
                     <div class="section program-cards ${variant}" data-section-type="program-cards">
                         <div class="section-container">
                             <div class="section-header">
-                                <div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>
-                                <h2 class="section-title editable" contenteditable="true" data-field="title">${data.title}</h2>
-                                <p class="section-subtitle editable" contenteditable="true" data-field="subtitle">${data.subtitle}</p>
+                                ${renderIfVisible('eyebrow', `<div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>`, visibility)}
+                                ${renderIfVisible('title', `<h2 class="section-title editable" contenteditable="true" data-field="title">${data.title}</h2>`, visibility)}
+                                ${renderIfVisible('subtitle', `<p class="section-subtitle editable" contenteditable="true" data-field="subtitle">${data.subtitle}</p>`, visibility)}
                             </div>
                             <div class="program-grid">
                                 ${data.programs.map((program, i) => `
@@ -305,9 +315,9 @@
                                     </div>
                                 `).join('')}
                             </div>
-                            <div style="text-align: center; margin-top: 2rem;">
+                            ${renderIfVisible('ctaText', `<div style="text-align: center; margin-top: 2rem;">
                                 <a href="#" class="cta-button editable" contenteditable="true" data-field="ctaText">${data.ctaText}</a>
-                            </div>
+                            </div>`, visibility)}
                         </div>
                         <div class="drag-handle" draggable="true" aria-label="Drag to reorder section">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
@@ -333,7 +343,7 @@
         'lead-form': {
             name: 'Lead Generation Form',
             variants: ['light', 'dark'],
-            render: (variant = 'light', content = {}, layoutDirection = 'normal') => {
+            render: (variant = 'light', content = {}, layoutDirection = 'normal', visibility = {}) => {
                 const defaults = {
                     eyebrow: 'Get Started',
                     title: 'Request Information',
@@ -370,9 +380,9 @@
                             <div class="form-layout ${layoutDirection === 'reversed' ? 'reversed' : ''}">
                                 <div class="form-content">
                                     <div class="form-header">
-                                        <div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>
-                                        <h2 class="section-title editable" contenteditable="true" data-field="title">${data.title}</h2>
-                                        <p class="form-description editable" contenteditable="true" data-field="description">${data.description}</p>
+                                        ${renderIfVisible('eyebrow', `<div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>`, visibility)}
+                                        ${renderIfVisible('title', `<h2 class="section-title editable" contenteditable="true" data-field="title">${data.title}</h2>`, visibility)}
+                                        ${renderIfVisible('description', `<p class="form-description editable" contenteditable="true" data-field="description">${data.description}</p>`, visibility)}
                                     </div>
                                     <form class="lead-generation-form" onsubmit="return false;">
                                         ${data.fields.map((field, i) => {
@@ -459,7 +469,7 @@
                                             fieldHtml += '</div>';
                                             return fieldHtml;
                                         }).join('')}
-                                        <button type="submit" class="submit-btn editable" contenteditable="true" data-field="submitText">${data.submitText}</button>
+                                        ${renderIfVisible('submitText', `<button type="submit" class="submit-btn editable" contenteditable="true" data-field="submitText">${data.submitText}</button>`, visibility)}
                                     </form>
                                 </div>
                                 <div class="form-image">
@@ -476,6 +486,13 @@
                             <button class="control-btn duplicate-btn" aria-label="Duplicate section">Duplicate</button>
                             <button class="control-btn variant-btn" aria-label="Toggle theme variant">Toggle Theme</button>
                             <button class="control-btn layout-btn" aria-label="Toggle layout direction">Toggle Layout</button>
+                            <button class="control-btn form-edit-btn" aria-label="Edit form fields">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
+                                Edit Form
+                            </button>
                             <button class="control-btn customize-btn" aria-label="Customize elements">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -518,13 +535,13 @@
                                 </div>
                                 <div class="testimonial-content-large">
                                     <div class="testimonial-header">
-                                        <div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>
-                                        <h2 class="section-title editable" contenteditable="true" data-field="title">${data.title}</h2>
+                                        ${renderIfVisible('eyebrow', `<div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>`, visibility)}
+                                        ${renderIfVisible('title', `<h2 class="section-title editable" contenteditable="true" data-field="title">${data.title}</h2>`, visibility)}
                                     </div>
-                                    <blockquote class="testimonial-quote-large editable" contenteditable="true" data-field="quote">"${data.quote}"</blockquote>
+                                    ${renderIfVisible('quote', `<blockquote class="testimonial-quote-large editable" contenteditable="true" data-field="quote">"${data.quote}"</blockquote>`, visibility)}
                                     <div class="testimonial-attribution">
-                                        <div class="testimonial-name editable" contenteditable="true" data-field="name">${data.name}</div>
-                                        <div class="testimonial-role editable" contenteditable="true" data-field="role">${data.role}</div>
+                                        ${renderIfVisible('name', `<div class="testimonial-name editable" contenteditable="true" data-field="name">${data.name}</div>`, visibility)}
+                                        ${renderIfVisible('role', `<div class="testimonial-role editable" contenteditable="true" data-field="role">${data.role}</div>`, visibility)}
                                     </div>
                                 </div>
                             </div>
@@ -594,8 +611,8 @@
                     <div class="section testimonial-carousel ${variant}" data-section-type="testimonial-carousel">
                         <div class="section-container">
                             <div class="section-header">
-                                <div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>
-                                <h2 class="section-title editable" contenteditable="true" data-field="title">${data.title}</h2>
+                                ${renderIfVisible('eyebrow', `<div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>`, visibility)}
+                                ${renderIfVisible('title', `<h2 class="section-title editable" contenteditable="true" data-field="title">${data.title}</h2>`, visibility)}
                             </div>
                             <div class="testimonial-carousel-container">
                                 <div class="testimonial-slide active">
@@ -639,7 +656,7 @@
         'image-content': {
             name: 'Image + Content',
             variants: ['light', 'dark'],
-            render: (variant = 'light', content = {}, layoutDirection = 'normal') => {
+            render: (variant = 'light', content = {}, layoutDirection = 'normal', visibility = {}) => {
                 const defaults = {
                     eyebrow: 'Campus Life',
                     title: 'Visit Our Campus',
@@ -666,10 +683,10 @@
                                     <div class="content-image">Mountain Graphic</div>
                                 </div>
                                 <div class="content-column">
-                                    <div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>
-                                    <h2 class="section-title editable" contenteditable="true" data-field="title">${data.title}</h2>
-                                    <div class="body-content editable" contenteditable="true" data-field="body">${formattedBody}</div>
-                                    <a href="#" class="cta-button editable" contenteditable="true" data-field="ctaText">${data.ctaText}</a>
+                                    ${renderIfVisible('eyebrow', `<div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>`, visibility)}
+                                    ${renderIfVisible('title', `<h2 class="section-title editable" contenteditable="true" data-field="title">${data.title}</h2>`, visibility)}
+                                    ${renderIfVisible('body', `<div class="body-content editable" contenteditable="true" data-field="body">${formattedBody}</div>`, visibility)}
+                                    ${renderIfVisible('ctaText', `<a href="#" class="cta-button editable" contenteditable="true" data-field="ctaText">${data.ctaText}</a>`, visibility)}
                                 </div>
                             </div>
                         </div>
@@ -714,6 +731,7 @@
             case 'three-column':
             case 'statistics':
             case 'programs':
+            case 'program-cards':
                 return {
                     eyebrow: true,
                     title: true,
@@ -751,20 +769,48 @@
     
     // Get element labels for display in the popover
     function getElementLabels(sectionType) {
-        const labels = {
-            eyebrow: 'Eyebrow Text',
-            title: 'Heading',
-            subtitle: 'Subtitle',
-            body: 'Body Content',
-            ctaText: 'CTA Button',
-            description: 'Description',
-            submitText: 'Submit Button',
-            quote: 'Testimonial Quote',
-            name: 'Author Name',
-            role: 'Author Role'
-        };
-        
-        return labels;
+        // Return labels specific to each section type
+        switch(sectionType) {
+            case 'lead-form':
+                return {
+                    eyebrow: 'Eyebrow Text',
+                    title: 'Heading',
+                    description: 'Description',
+                    submitText: 'Submit Button'
+                };
+            case 'testimonial-single':
+                return {
+                    eyebrow: 'Eyebrow Text',
+                    title: 'Heading',
+                    quote: 'Testimonial Quote',
+                    name: 'Author Name',
+                    role: 'Author Role'
+                };
+            case 'testimonial-carousel':
+                return {
+                    eyebrow: 'Eyebrow Text',
+                    title: 'Heading'
+                };
+            case 'three-column':
+            case 'statistics':
+            case 'programs':
+            case 'program-cards':
+                return {
+                    eyebrow: 'Eyebrow Text',
+                    title: 'Heading',
+                    subtitle: 'Subtitle',
+                    ctaText: 'CTA Button'
+                };
+            case 'content-cta':
+            case 'image-content':
+            default:
+                return {
+                    eyebrow: 'Eyebrow Text',
+                    title: 'Heading',
+                    body: 'Body Content',
+                    ctaText: 'CTA Button'
+                };
+        }
     }
     
     // Helper function to conditionally render elements based on visibility
@@ -931,20 +977,29 @@
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
+        initializeDOMElements();
         setupEventListeners();
         initializeGuidance();
         initializeDragAndDrop();
-        addGoogleDocsExportButton();
-        addFormSettingsButton();
+        // Export dropdown is now handled in setupEventListeners
+        // addFormSettingsButton(); // Commented out - form settings accessed via section controls
+        setupSidebarEnhancements();
         updateCanvas(false);
         saveToHistory();
     });
 
     // Event listeners setup
     function setupEventListeners() {
+        // Check if elements exist before adding listeners
+        if (!canvas) {
+            console.error('Canvas element not found');
+            return;
+        }
+        
         // Section library clicks with debounce
         let addSectionTimeout;
-        sectionLibrary.addEventListener('click', (e) => {
+        if (sectionLibrary) {
+            sectionLibrary.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             
@@ -961,9 +1016,10 @@
                     btn.disabled = false;
                 }, 300);
                 
-                addSection(sectionType);
+                    addSection(sectionType);
             }
-        });
+            });
+        }
 
         // Viewport controls
         viewportBtns.forEach(btn => {
@@ -975,27 +1031,39 @@
             });
         });
 
-        // Export/Import with error handling
-        exportBtn.addEventListener('click', exportJSON);
-        importBtn.addEventListener('click', () => importFile.click());
-        importFile.addEventListener('change', handleImport);
-        exportImageBtn.addEventListener('click', exportAsImage);
-        deleteAllBtn.addEventListener('click', deleteAllSections);
+        // Setup export dropdown
+        setupExportDropdown();
+        
+        // Import with error handling
+        if (importBtn && importFile) {
+            importBtn.addEventListener('click', () => importFile.click());
+            importFile.addEventListener('change', handleImport);
+        }
+        
+        if (deleteAllBtn) {
+            deleteAllBtn.addEventListener('click', deleteAllSections);
+        }
         
         // Undo/Redo
-        undoBtn.addEventListener('click', undo);
-        redoBtn.addEventListener('click', redo);
+        if (undoBtn) {
+            undoBtn.addEventListener('click', undo);
+        }
+        if (redoBtn) {
+            redoBtn.addEventListener('click', redo);
+        }
         
         // Toggle sidebar
-        toggleSidebarBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('hidden');
-            toggleSidebarBtn.classList.toggle('active');
-            
-            // Update toggle button aria-label
-            const isHidden = sidebar.classList.contains('hidden');
-            toggleSidebarBtn.setAttribute('aria-label', isHidden ? 'Show sidebar' : 'Hide sidebar');
-            toggleSidebarBtn.setAttribute('aria-expanded', !isHidden);
-        });
+        if (toggleSidebarBtn && sidebar) {
+            toggleSidebarBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('hidden');
+                toggleSidebarBtn.classList.toggle('active');
+                
+                // Update toggle button aria-label
+                const isHidden = sidebar.classList.contains('hidden');
+                toggleSidebarBtn.setAttribute('aria-label', isHidden ? 'Show sidebar' : 'Hide sidebar');
+                toggleSidebarBtn.setAttribute('aria-expanded', !isHidden);
+            });
+        }
         
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
@@ -1016,6 +1084,14 @@
                 eventHandlers.toggleVariant(e.target);
             } else if (e.target.classList.contains('layout-btn')) {
                 eventHandlers.toggleLayout(e.target);
+            } else if (e.target.classList.contains('form-edit-btn') || e.target.closest('.form-edit-btn')) {
+                const btn = e.target.closest('.form-edit-btn') || e.target;
+                const section = btn.closest('.section');
+                const sections = Array.from(canvas.querySelectorAll('.section'));
+                const sectionIndex = sections.indexOf(section);
+                if (sectionIndex !== -1 && state.sections[sectionIndex].type === 'lead-form') {
+                    formBuilder.open(sectionIndex);
+                }
             } else if (e.target.classList.contains('customize-btn') || e.target.closest('.customize-btn')) {
                 const btn = e.target.closest('.customize-btn') || e.target;
                 eventHandlers.toggleCustomizePopover(btn);
@@ -1251,6 +1327,10 @@
 
     // Export as image with error handling
     async function exportAsImage() {
+        if (!canvas) {
+            alert('Canvas not initialized');
+            return;
+        }
         const wireframe = canvas.querySelector('.wireframe-container');
         if (!wireframe) {
             alert('Please add sections to export');
@@ -2124,34 +2204,111 @@
     
     const formBuilder = new FormBuilder();
 
-    // Add Google Docs export button to header
-    function addGoogleDocsExportButton() {
-        const headerActions = document.querySelector('.header-actions');
+    // Setup sidebar enhancements
+    function setupSidebarEnhancements() {
+        // Category toggle functionality
+        const categoryHeaders = document.querySelectorAll('.category-header');
+        categoryHeaders.forEach(header => {
+            header.addEventListener('click', () => {
+                const categoryItems = header.nextElementSibling;
+                const arrow = header.querySelector('.category-arrow');
+                
+                categoryItems.classList.toggle('expanded');
+                header.setAttribute('aria-expanded', categoryItems.classList.contains('expanded'));
+            });
+        });
         
-        const googleDocsBtn = document.createElement('button');
-        googleDocsBtn.id = 'exportGoogleDocsBtn';
-        googleDocsBtn.className = 'btn btn-primary';
-        googleDocsBtn.textContent = 'Export to Google Docs';
-        googleDocsBtn.addEventListener('click', async () => {
+        // Component search functionality
+        const searchInput = document.getElementById('componentSearch');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const allButtons = document.querySelectorAll('.section-btn');
+                const categories = document.querySelectorAll('.component-category');
+                
+                if (searchTerm === '') {
+                    // Show all components and categories
+                    allButtons.forEach(btn => btn.style.display = '');
+                    categories.forEach(cat => cat.style.display = '');
+                    return;
+                }
+                
+                // Filter components
+                categories.forEach(category => {
+                    const categoryButtons = category.querySelectorAll('.section-btn');
+                    let hasVisibleButtons = false;
+                    
+                    categoryButtons.forEach(btn => {
+                        const text = btn.textContent.toLowerCase();
+                        if (text.includes(searchTerm)) {
+                            btn.style.display = '';
+                            hasVisibleButtons = true;
+                        } else {
+                            btn.style.display = 'none';
+                        }
+                    });
+                    
+                    // Hide category if no visible buttons
+                    category.style.display = hasVisibleButtons ? '' : 'none';
+                    
+                    // Expand category if it has matches
+                    if (hasVisibleButtons) {
+                        const items = category.querySelector('.category-items');
+                        items.classList.add('expanded');
+                    }
+                });
+            });
+        }
+    }
+    
+    // Setup export dropdown functionality
+    function setupExportDropdown() {
+        const exportDropdownBtn = document.getElementById('exportDropdownBtn');
+        const exportMenu = document.getElementById('exportMenu');
+        const exportBtn = document.getElementById('exportBtn');
+        const exportImageBtn = document.getElementById('exportImageBtn');
+        const googleDocsExportBtn = document.getElementById('googleDocsExportBtn');
+        
+        // Toggle dropdown
+        exportDropdownBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            exportMenu.classList.toggle('show');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            exportMenu.classList.remove('show');
+        });
+        
+        // Export handlers
+        exportImageBtn.addEventListener('click', () => {
+            exportMenu.classList.remove('show');
+            exportAsImage();
+        });
+        
+        exportBtn.addEventListener('click', () => {
+            exportMenu.classList.remove('show');
+            exportJSON();
+        });
+        
+        googleDocsExportBtn.addEventListener('click', async () => {
+            exportMenu.classList.remove('show');
             if (state.sections.length === 0) {
                 alert('Please add sections to export');
                 return;
             }
 
             try {
-                googleDocsBtn.disabled = true;
-                googleDocsBtn.textContent = 'Exporting...';
+                googleDocsExportBtn.disabled = true;
+                googleDocsExportBtn.textContent = 'Exporting...';
                 await googleDocsExporter.exportToGoogleDocs();
             } catch (error) {
                 console.error('Export failed:', error);
             } finally {
-                googleDocsBtn.disabled = false;
-                googleDocsBtn.textContent = 'Export to Google Docs';
+                googleDocsExportBtn.disabled = false;
+                googleDocsExportBtn.textContent = 'Copy to Google Docs';
             }
         });
-
-        const exportImageBtn = document.getElementById('exportImageBtn');
-        headerActions.insertBefore(googleDocsBtn, exportImageBtn);
     }
 
     // Add Form Settings button to sidebar
@@ -2188,11 +2345,9 @@
     
     // Update form settings button visibility
     function updateFormSettingsVisibility() {
-        const formSettingsContainer = document.getElementById('formSettingsContainer');
-        if (formSettingsContainer) {
-            const hasLeadForm = state.sections.some(s => s.type === 'lead-form');
-            formSettingsContainer.style.display = hasLeadForm ? 'block' : 'none';
-        }
+        // Form settings are now accessed through section controls
+        // This function is kept for backwards compatibility
+        return;
     }
 
     // Delete all sections with confirmation
