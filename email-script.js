@@ -63,29 +63,17 @@
     // Email section templates - Hero sections only
     const sectionTemplates = {
         'hero': {
-            name: 'Hero Section',
+            name: 'Content Section',
             variants: ['light', 'dark'],
             render: (variant = 'light', content = {}, layoutDirection = 'normal', visibility = {}) => {
-                // Get the specific hero variant from content
-                const heroVariant = content.heroVariant || 'single-column';
-                
-                // Variant-specific defaults
-                const variantDefaults = {
-                    'single-column': {
-                        eyebrow: 'Transform Your Future',
-                        title: 'Discover Your Potential at Our University',
-                        body: 'Join 15,000+ successful graduates building meaningful careers in their chosen fields.',
-                        ctaText: 'Explore Programs'
-                    },
-                    'split': {
-                        eyebrow: 'Campus Excellence',
-                        title: 'Where Innovation Meets Education',
-                        body: 'Experience cutting-edge research opportunities and personalized learning in our state-of-the-art facilities.',
-                        ctaText: 'Schedule Tour'
-                    }
+                // Hero section is now single-column only
+                const defaults = {
+                    eyebrow: 'Transform Your Future',
+                    title: 'Discover Your Potential at Our University',
+                    body: 'Join 15,000+ successful graduates building meaningful careers in their chosen fields.',
+                    ctaText: 'Explore Programs'
                 };
                 
-                const defaults = variantDefaults[heroVariant] || variantDefaults['single-column'];
                 const data = { ...defaults, ...content };
                 
                 // Sanitize all user content
@@ -96,61 +84,193 @@
                 });
                 
                 const isDark = variant === 'dark';
-                const isReversed = layoutDirection === 'reversed' && heroVariant === 'split';
                 
-                // Render based on hero variant
-                if (heroVariant === 'single-column') {
-                    return `
-                        <div class="section hero-section ${variant}" data-section-type="hero" data-variant="single-column" style="${isDark ? 'background-color: #1A365D; color: white;' : 'background-color: white; color: #1A202C;'}">
-                            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; max-width: 600px; margin: 0 auto;">
-                                <tr>
-                                    <td style="padding: 40px 20px; text-align: center;">
-                                        ${renderIfVisible('eyebrow', `<div class="eyebrow editable" contenteditable="true" data-field="eyebrow" style="font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: ${isDark ? '#FC8181' : '#E53E3E'}; margin-bottom: 8px;">${data.eyebrow}</div>`, visibility)}
-                                        ${renderIfVisible('title', `<h1 class="section-title editable" contenteditable="true" data-field="title" style="font-size: 32px; font-weight: bold; line-height: 1.3; margin: 0 0 16px 0; color: ${isDark ? 'white' : '#1A202C'};">${data.title}</h1>`, visibility)}
-                                        ${renderIfVisible('body', `<p class="body-content editable" contenteditable="true" data-field="body" style="font-size: 18px; line-height: 1.6; margin: 0 0 24px 0; color: ${isDark ? '#E2E8F0' : '#718096'};">${data.body}</p>`, visibility)}
-                                        ${renderIfVisible('ctaText', `<a href="#" class="cta-button editable" contenteditable="true" data-field="ctaText" style="display: inline-block; padding: 14px 24px; background-color: #E53E3E; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">${data.ctaText}</a>`, visibility)}
-                                    </td>
-                                </tr>
-                            </table>
-                            ${renderSectionControls('single-column')}
-                        </div>
-                    `;
-                } else if (heroVariant === 'split') {
-                    const textColumn = `
-                        <td style="width: 50%; vertical-align: middle; padding: 20px; text-align: left;">
-                            ${renderIfVisible('eyebrow', `<div class="eyebrow editable" contenteditable="true" data-field="eyebrow" style="font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: ${isDark ? '#FC8181' : '#E53E3E'}; margin-bottom: 8px; text-align: left;">${data.eyebrow}</div>`, visibility)}
-                            ${renderIfVisible('title', `<h2 class="section-title editable" contenteditable="true" data-field="title" style="font-size: 28px; font-weight: bold; line-height: 1.3; margin: 0 0 12px 0; color: ${isDark ? 'white' : '#1A202C'}; text-align: left;">${data.title}</h2>`, visibility)}
-                            ${renderIfVisible('body', `<p class="body-content editable" contenteditable="true" data-field="body" style="font-size: 16px; line-height: 1.6; margin: 0 0 20px 0; color: ${isDark ? '#E2E8F0' : '#718096'}; text-align: left;">${data.body}</p>`, visibility)}
-                            ${renderIfVisible('ctaText', `<a href="#" class="cta-button editable" contenteditable="true" data-field="ctaText" style="display: inline-block; padding: 12px 20px; background-color: #E53E3E; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">${data.ctaText}</a>`, visibility)}
-                        </td>
-                    `;
-                    
-                    const imageColumn = `
-                        <td style="width: 50%; vertical-align: middle; padding: 20px;">
-                            <div style="width: 100%; height: 200px; background-color: #E2E8F0; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: #718096; font-weight: 500;">
-                                Campus Image
-                            </div>
-                        </td>
-                    `;
-                    
-                    return `
-                        <div class="section hero-section ${variant}" data-section-type="hero" data-variant="split" style="${isDark ? 'background-color: #1A365D; color: white;' : 'background-color: white; color: #1A202C;'}">
-                            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; max-width: 600px; margin: 0 auto;">
-                                <tr>
-                                    ${isReversed ? imageColumn + textColumn : textColumn + imageColumn}
-                                </tr>
-                            </table>
-                            ${renderSectionControls('split')}
-                        </div>
-                    `;
+                return `
+                    <div class="section hero-section ${variant}" data-section-type="hero" style="${isDark ? 'background-color: #1A365D; color: white;' : 'background-color: white; color: #1A202C;'}">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; max-width: 600px; margin: 0 auto;">
+                            <tr>
+                                <td style="padding: 40px 20px; text-align: center;">
+                                    ${renderIfVisible('eyebrow', `<div class="eyebrow editable" contenteditable="true" data-field="eyebrow" style="font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: ${isDark ? '#FC8181' : '#E53E3E'}; margin-bottom: 8px;">${data.eyebrow}</div>`, visibility)}
+                                    ${renderIfVisible('title', `<h1 class="section-title editable" contenteditable="true" data-field="title" style="font-size: 32px; font-weight: bold; line-height: 1.3; margin: 0 0 16px 0; color: ${isDark ? 'white' : '#1A202C'};">${data.title}</h1>`, visibility)}
+                                    ${renderIfVisible('body', `<p class="body-content editable" contenteditable="true" data-field="body" style="font-size: 18px; line-height: 1.6; margin: 0 0 24px 0; color: ${isDark ? '#E2E8F0' : '#718096'};">${data.body}</p>`, visibility)}
+                                    ${renderIfVisible('ctaText', `<a href="#" class="cta-button editable" contenteditable="true" data-field="ctaText" style="display: inline-block; padding: 14px 24px; background-color: #E53E3E; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">${data.ctaText}</a>`, visibility)}
+                                </td>
+                            </tr>
+                        </table>
+                        ${renderSectionControls('hero')}
+                    </div>
+                `;
+            }
+        },
+        
+        
+        'testimonial': {
+            name: 'Testimonial',
+            variants: ['light', 'dark'],
+            render: (variant = 'light', content = {}, layoutDirection = null, visibility = {}) => {
+                const defaults = {
+                    quote: 'This program completely transformed my career. The personalized mentorship and industry connections led to my dream job within three months of graduation.',
+                    name: 'Sarah Johnson',
+                    role: 'Marketing Manager at TechCorp',
+                    company: 'TechCorp'
+                };
+                const data = { ...defaults, ...content };
+                
+                // Sanitize all user content
+                Object.keys(data).forEach(key => {
+                    if (typeof data[key] === 'string') {
+                        data[key] = escapeHtml(data[key]);
+                    }
+                });
+                
+                const isDark = variant === 'dark';
+                
+                return `
+                    <div class="section testimonial ${variant}" data-section-type="testimonial" style="${isDark ? 'background-color: #1A365D; color: white;' : 'background-color: white; color: #1A202C;'}">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; max-width: 600px; margin: 0 auto;">
+                            <tr>
+                                <td style="padding: 40px 20px; text-align: center;">
+                                    <div style="width: 80px; height: 80px; border-radius: 50%; background-color: ${isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0'}; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px auto; color: ${isDark ? '#E2E8F0' : '#718096'}; font-weight: 500; font-size: 12px;">
+                                        Photo
+                                    </div>
+                                    
+                                    ${renderIfVisible('quote', `<blockquote class="testimonial-quote editable" contenteditable="true" data-field="quote" style="font-size: 18px; line-height: 1.6; font-style: italic; margin: 0 0 24px 0; color: ${isDark ? '#E2E8F0' : '#1A202C'}; max-width: 90%; margin-left: auto; margin-right: auto; margin-bottom: 24px; border-left: 4px solid ${isDark ? '#FC8181' : '#E53E3E'}; padding-left: 20px; text-align: left;">"${data.quote}"</blockquote>`, visibility)}
+                                    
+                                    <div style="text-align: center;">
+                                        ${renderIfVisible('name', `<div class="testimonial-name editable" contenteditable="true" data-field="name" style="font-size: 16px; font-weight: 600; margin-bottom: 4px; color: ${isDark ? 'white' : '#1A202C'};">${data.name}</div>`, visibility)}
+                                        ${renderIfVisible('role', `<div class="testimonial-role editable" contenteditable="true" data-field="role" style="font-size: 14px; color: ${isDark ? '#E2E8F0' : '#718096'};">${data.role}</div>`, visibility)}
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        ${renderSectionControls('testimonial')}
+                    </div>
+                `;
+            }
+        },
+        
+        'footer': {
+            name: 'Footer',
+            variants: ['light', 'dark'],
+            render: (variant = 'light', content = {}, layoutDirection = null, visibility = {}) => {
+                const defaults = {
+                    companyName: 'Your University',
+                    address: '123 Education Blvd, Learning City, LC 12345',
+                    phone: '(555) 123-LEARN',
+                    email: 'info@youruniversity.edu',
+                    unsubscribeText: 'Unsubscribe from these emails',
+                    privacyText: 'Privacy Policy'
+                };
+                const data = { ...defaults, ...content };
+                
+                // Sanitize all user content
+                Object.keys(data).forEach(key => {
+                    if (typeof data[key] === 'string') {
+                        data[key] = escapeHtml(data[key]);
+                    }
+                });
+                
+                const isDark = variant === 'dark';
+                
+                return `
+                    <div class="section footer ${variant}" data-section-type="footer" style="${isDark ? 'background-color: #1A365D; color: white;' : 'background-color: #F7FAFC; color: #1A202C;'}">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; max-width: 600px; margin: 0 auto;">
+                            <tr>
+                                <td style="padding: 40px 20px; text-align: center;">
+                                    ${renderIfVisible('companyName', `<div class="footer-company editable" contenteditable="true" data-field="companyName" style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: ${isDark ? 'white' : '#1A202C'};">${data.companyName}</div>`, visibility)}
+                                    
+                                    ${renderIfVisible('address', `<div class="footer-address editable" contenteditable="true" data-field="address" style="font-size: 14px; line-height: 1.5; margin-bottom: 8px; color: ${isDark ? '#E2E8F0' : '#718096'};">${data.address}</div>`, visibility)}
+                                    
+                                    <div style="margin: 16px 0;">
+                                        ${renderIfVisible('phone', `<span class="footer-phone editable" contenteditable="true" data-field="phone" style="font-size: 14px; color: ${isDark ? '#E2E8F0' : '#718096'}; margin-right: 16px;">${data.phone}</span>`, visibility)}
+                                        ${renderIfVisible('email', `<a href="mailto:${data.email}" class="footer-email editable" contenteditable="true" data-field="email" style="font-size: 14px; color: ${isDark ? '#FC8181' : '#E53E3E'}; text-decoration: none;">${data.email}</a>`, visibility)}
+                                    </div>
+                                    
+                                    <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid ${isDark ? 'rgba(255,255,255,0.2)' : '#E2E8F0'};">
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+                                            <tr>
+                                                <td style="width: 50%; text-align: center; padding: 8px;">
+                                                    ${renderIfVisible('unsubscribeText', `<a href="#" class="footer-unsubscribe editable" contenteditable="true" data-field="unsubscribeText" style="font-size: 12px; color: ${isDark ? '#E2E8F0' : '#718096'}; text-decoration: underline;">${data.unsubscribeText}</a>`, visibility)}
+                                                </td>
+                                                <td style="width: 50%; text-align: center; padding: 8px;">
+                                                    ${renderIfVisible('privacyText', `<a href="#" class="footer-privacy editable" contenteditable="true" data-field="privacyText" style="font-size: 12px; color: ${isDark ? '#E2E8F0' : '#718096'}; text-decoration: underline;">${data.privacyText}</a>`, visibility)}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        ${renderSectionControls('footer')}
+                    </div>
+                `;
+            }
+        },
+        
+        'product-showcase': {
+            name: 'Product Showcase',
+            variants: ['light', 'dark'],
+            render: (variant = 'light', content = {}, layoutDirection = 'normal', visibility = {}) => {
+                const defaults = {
+                    eyebrow: 'Featured Program',
+                    title: 'Master of Data Science',
+                    description: 'Launch your career in data science with our comprehensive 18-month program. Learn from industry experts and gain hands-on experience with real-world projects.',
+                    features: [
+                        '18-month accelerated program',
+                        'Industry expert instructors',
+                        'Real-world capstone projects',
+                        '97% job placement rate'
+                    ],
+                    ctaText: 'Learn More'
+                };
+                const data = { ...defaults, ...content };
+                
+                // Sanitize all user content
+                Object.keys(data).forEach(key => {
+                    if (typeof data[key] === 'string') {
+                        data[key] = escapeHtml(data[key]);
+                    }
+                });
+                
+                if (Array.isArray(data.features)) {
+                    data.features = data.features.map(feature => escapeHtml(feature));
                 }
                 
-                // Default fallback
-                return `
-                    <div class="section hero-section ${variant}" data-section-type="hero">
-                        <div class="section-container">
-                            <p>Unknown hero variant: ${heroVariant}</p>
+                const isDark = variant === 'dark';
+                const isReversed = layoutDirection === 'reversed';
+                
+                const imageColumn = `
+                    <td style="width: 50%; vertical-align: middle; padding: 20px;">
+                        <div style="width: 100%; height: 200px; background-color: ${isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0'}; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: ${isDark ? '#E2E8F0' : '#718096'}; font-weight: 500; font-size: 14px;">
+                            Program Image
                         </div>
+                    </td>
+                `;
+                
+                const contentColumn = `
+                    <td style="width: 50%; vertical-align: middle; padding: 20px; text-align: left;">
+                        ${renderIfVisible('eyebrow', `<div class="eyebrow editable" contenteditable="true" data-field="eyebrow" style="font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: ${isDark ? '#FC8181' : '#E53E3E'}; margin-bottom: 8px; text-align: left;">${data.eyebrow}</div>`, visibility)}
+                        ${renderIfVisible('title', `<h2 class="section-title editable" contenteditable="true" data-field="title" style="font-size: 24px; font-weight: bold; line-height: 1.3; margin: 0 0 12px 0; color: ${isDark ? 'white' : '#1A202C'}; text-align: left;">${data.title}</h2>`, visibility)}
+                        ${renderIfVisible('description', `<p class="product-description editable" contenteditable="true" data-field="description" style="font-size: 14px; line-height: 1.6; margin: 0 0 16px 0; color: ${isDark ? '#E2E8F0' : '#718096'}; text-align: left;">${data.description}</p>`, visibility)}
+                        
+                        ${renderIfVisible('features', `<ul style="margin: 0 0 20px 0; padding-left: 16px;">
+                            ${data.features.map((feature, i) => `
+                                <li class="feature-item editable" contenteditable="true" data-field="feature-${i}" style="font-size: 14px; line-height: 1.5; margin-bottom: 8px; color: ${isDark ? '#E2E8F0' : '#718096'};">${feature}</li>
+                            `).join('')}
+                        </ul>`, visibility)}
+                        
+                        ${renderIfVisible('ctaText', `<a href="#" class="cta-button editable" contenteditable="true" data-field="ctaText" style="display: inline-block; padding: 12px 20px; background-color: #E53E3E; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">${data.ctaText}</a>`, visibility)}
+                    </td>
+                `;
+                
+                return `
+                    <div class="section product-showcase ${variant}" data-section-type="product-showcase" style="${isDark ? 'background-color: #1A365D; color: white;' : 'background-color: white; color: #1A202C;'}">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; max-width: 600px; margin: 0 auto;">
+                            <tr>
+                                ${isReversed ? imageColumn + contentColumn : contentColumn + imageColumn}
+                            </tr>
+                        </table>
+                        ${renderSectionControls('product-showcase')}
                     </div>
                 `;
             }
@@ -159,7 +279,7 @@
     
     // Helper function to render section controls
     function renderSectionControls(variant) {
-        const hasLayoutToggle = variant === 'split';
+        const hasLayoutToggle = variant === 'product-showcase';
         
         return `
             <div class="drag-handle" draggable="true" aria-label="Drag to reorder section">
@@ -183,14 +303,35 @@
         `;
     }
     // Get default visibility settings for a section type
-    function getDefaultVisibility(sectionType, heroVariant) {
-        // Only support hero sections in email builder
+    function getDefaultVisibility(sectionType) {
         if (sectionType === 'hero') {
-            // All hero variants (single-column and split) have eyebrow, title, body, ctaText
             return {
                 eyebrow: true,
                 title: true,
                 body: true,
+                ctaText: true
+            };
+        } else if (sectionType === 'testimonial') {
+            return {
+                quote: true,
+                name: true,
+                role: true
+            };
+        } else if (sectionType === 'footer') {
+            return {
+                companyName: true,
+                address: true,
+                phone: true,
+                email: true,
+                unsubscribeText: true,
+                privacyText: true
+            };
+        } else if (sectionType === 'product-showcase') {
+            return {
+                eyebrow: true,
+                title: true,
+                description: true,
+                features: true,
                 ctaText: true
             };
         }
@@ -206,12 +347,34 @@
     
     // Get element labels for display in the popover
     function getElementLabels(sectionType) {
-        // Only support hero sections in email builder
         if (sectionType === 'hero') {
             return {
                 eyebrow: 'Eyebrow Text',
                 title: 'Headline',
                 body: 'Body Content',
+                ctaText: 'CTA Button'
+            };
+        } else if (sectionType === 'testimonial') {
+            return {
+                quote: 'Testimonial Quote',
+                name: 'Customer Name',
+                role: 'Role & Company'
+            };
+        } else if (sectionType === 'footer') {
+            return {
+                companyName: 'Company Name',
+                address: 'Address',
+                phone: 'Phone Number',
+                email: 'Email Address',
+                unsubscribeText: 'Unsubscribe Link',
+                privacyText: 'Privacy Policy Link'
+            };
+        } else if (sectionType === 'product-showcase') {
+            return {
+                eyebrow: 'Eyebrow Text',
+                title: 'Product/Program Title',
+                description: 'Product Description',
+                features: 'Feature List',
                 ctaText: 'CTA Button'
             };
         }
@@ -544,30 +707,24 @@
         }, true);
     }
 
-    // Add section to canvas (Email Hero sections only)
+    // Add section to canvas (All email sections)
     function addSection(type, heroVariant, content = {}) {
-        // Only support hero sections in email builder
-        if (type !== 'hero') {
-            console.warn('Only Hero sections are supported in the email builder');
+        const template = sectionTemplates[type];
+        if (!template) {
+            console.warn(`Section template '${type}' not found`);
             return;
         }
-
-        const template = sectionTemplates[type];
-        if (!template) return;
-
-        // Store the hero variant in content for the template to use
-        content = { ...content, heroVariant: heroVariant || 'single-column' };
 
         const sectionData = {
             id: Date.now(),
             type,
             variant: 'light', // Theme variant (light/dark)
             content,
-            visibility: getDefaultVisibility(type, heroVariant)
+            visibility: getDefaultVisibility(type)
         };
         
-        // Add layoutDirection for split hero variant
-        if (heroVariant === 'split') {
+        // Add layoutDirection for product-showcase only
+        if (type === 'product-showcase') {
             sectionData.layoutDirection = 'normal';
         }
 
@@ -1068,17 +1225,6 @@
             };
             
             switch (type) {
-                case 'content-cta':
-                    return {
-                        type: 'Content + CTA',
-                        variant: section.variant,
-                        content: [
-                            includeIfVisible('eyebrow', 'Eyebrow', content.eyebrow),
-                            includeIfVisible('title', 'Headline', content.title),
-                            includeIfVisible('body', 'Body', content.body),
-                            includeIfVisible('ctaText', 'CTA Text', content.ctaText)
-                        ].filter(Boolean) // Remove null entries
-                    };
                     
                 case 'image-content':
                     return {

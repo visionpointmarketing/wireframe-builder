@@ -2257,29 +2257,101 @@ body {
     }
 }
 
-/* Email-specific responsive rules for Hero split variant */
-@media screen and (max-width: 480px) {
-    .hero-section[data-variant="split"] table tr {
-        display: block !important;
-    }
-    
-    .hero-section[data-variant="split"] table td {
-        display: block !important;
-        width: 100% !important;
-        padding: 15px 20px !important;
-    }
-    
-    .hero-section[data-variant="split"] table td:first-child {
-        padding-bottom: 10px !important;
-    }
-    
-    .hero-section[data-variant="split"] table td:last-child {
-        padding-top: 10px !important;
-    }
+/* Email-specific responsive rules using class-based controls */
+
+/* Tablet responsive styles for email sections */
+
+/* Product Showcase responsive styles */
+.canvas.tablet .product-showcase table tr {
+    display: block !important;
 }
 
-@media screen and (max-width: 320px) {
-    .hero-section[data-variant="split"] table td {
-        padding: 10px 15px !important;
-    }
+.canvas.tablet .product-showcase table td {
+    display: block !important;
+    width: 100% !important;
+    padding: 15px 20px !important;
+    text-align: left !important;
 }
+
+.canvas.tablet .product-showcase table td:first-child {
+    padding-bottom: 10px !important;
+}
+
+.canvas.tablet .product-showcase table td:last-child {
+    padding-top: 10px !important;
+}
+
+.canvas.mobile .product-showcase table tr {
+    display: block !important;
+}
+
+.canvas.mobile .product-showcase table td {
+    display: block !important;
+    width: 100% !important;
+    padding: 10px 15px !important;
+    text-align: left !important;
+}
+
+.canvas.mobile .product-showcase table td:first-child {
+    padding-bottom: 8px !important;
+}
+
+.canvas.mobile .product-showcase table td:last-child {
+    padding-top: 8px !important;
+}
+
+/* General email section responsive adjustments */
+.canvas.tablet .section {
+    padding: 2rem 1rem !important;
+}
+
+.canvas.tablet .section h1,
+.canvas.tablet .section h2 {
+    font-size: 1.75rem !important;
+}
+
+.canvas.tablet .section p {
+    font-size: 0.9375rem !important;
+}
+
+.canvas.mobile .section {
+    padding: 1.5rem 0.75rem !important;
+}
+
+.canvas.mobile .section h1,
+.canvas.mobile .section h2 {
+    font-size: 1.5rem !important;
+}
+
+.canvas.mobile .section p {
+    font-size: 0.875rem !important;
+}
+
+.canvas.mobile .cta-button {
+    padding: 12px 18px !important;
+    font-size: 14px !important;
+}
+
+/* Footer responsive adjustments */
+.canvas.tablet .footer table table tr {
+    display: block !important;
+}
+
+.canvas.tablet .footer table table td {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+    padding: 4px !important;
+}
+
+.canvas.mobile .footer table table tr {
+    display: block !important;
+}
+
+.canvas.mobile .footer table table td {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+    padding: 2px !important;
+}
+
