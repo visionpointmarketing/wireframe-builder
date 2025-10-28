@@ -1485,26 +1485,150 @@
                 saveContentFromEditable();
                 const docData = this.convertWireframeToDocFormat(state.sections);
                 
-                // Convert data to base64 to pass as URL parameter
-                const encodedData = btoa(encodeURIComponent(JSON.stringify(docData)));
+                // Validate and prepare data for export
+                const exportResult = this.prepareDataForExport(docData);
                 
-                // Use GET request with data as parameter (avoids CORS issues)
+                if (!exportResult.success) {
+                    if (exportResult.optimizedData) {
+                        const shouldContinue = confirm(
+                            `${exportResult.message}\n\nWould you like to export with optimized content?`
+                        );
+                        if (!shouldContinue) {
+                            return;
+                        }
+                        // Use the optimized data
+                        docData = exportResult.optimizedData;
+                    } else {
+                        // Data is too large even with optimization
+                        alert(exportResult.message);
+                        return;
+                    }
+                }
+                
+                // Prepare data for export with Google Apps Script compatible encoding
+                const jsonString = JSON.stringify(docData);
+                let encodedData;
+                let statusMessage = '';
+                
+                // Use standard base64 encoding (compatible with Google Apps Script)
+                encodedData = btoa(encodeURIComponent(jsonString));
+                
+                // Set status message based on export result
+                if (exportResult.success) {
+                    statusMessage = exportResult.message || `Export ready (${jsonString.length} characters)`;
+                } else {
+                    statusMessage = `Optimized export ready (${jsonString.length} characters)`;
+                }
+                
+                console.log(`Export data: ${statusMessage}`);
+                
+                // Final URL length check
                 const url = `${this.SCRIPT_URL}?data=${encodedData}`;
                 
-                // Open in new window/tab - this bypasses CORS completely
+                if (url.length > 7500) { // Conservative limit
+                    throw new Error(
+                        'Wireframe is too large for export. Please try removing some sections or content.'
+                    );
+                }
+                
+                // Open in new window/tab
                 const newWindow = window.open(url, '_blank');
                 
                 if (!newWindow) {
                     throw new Error('Popup blocked. Please allow popups for this site.');
                 }
                 
-                // Show success message
-                alert('Creating Google Doc... The document will open in a new tab.');
+                // Show success message with status info
+                alert(`Creating Google Doc... The document will open in a new tab.\n\n${statusMessage}`);
                 
             } catch (error) {
                 console.error('Export error:', error);
                 alert('Error exporting to Google Docs: ' + error.message);
             }
+        }
+        
+        prepareDataForExport(docData) {
+            const jsonString = JSON.stringify(docData);
+            const dataSize = jsonString.length;
+            const encodedSize = btoa(encodeURIComponent(jsonString)).length;
+            const urlSize = encodedSize + this.SCRIPT_URL.length + 50; // Buffer for URL structure
+            
+            // Define size thresholds
+            const SMALL_SIZE = 3000;  // 3KB - no optimization needed
+            const MEDIUM_SIZE = 6000; // 6KB - light optimization
+            const MAX_URL_SIZE = 7500; // Conservative Google Apps Script limit
+            
+            // Small wireframes - no optimization needed
+            if (dataSize <= SMALL_SIZE && urlSize <= MAX_URL_SIZE) {
+                return { 
+                    success: true, 
+                    size: 'small',
+                    message: `Wireframe size: ${dataSize} characters (optimal size)`
+                };
+            }
+            
+            // Medium wireframes - check if optimization is needed
+            if (dataSize <= MEDIUM_SIZE) {
+                if (urlSize <= MAX_URL_SIZE) {
+                    return { 
+                        success: true, 
+                        size: 'medium',
+                        message: `Wireframe size: ${dataSize} characters (within limits)`
+                    };
+                }
+            }
+            
+            // Large wireframes or those exceeding URL limits - try optimization
+            const optimizedData = this.optimizeContentForExport(docData);
+            const optimizedJsonString = JSON.stringify(optimizedData);
+            const optimizedEncodedSize = btoa(encodeURIComponent(optimizedJsonString)).length;
+            const optimizedUrlSize = optimizedEncodedSize + this.SCRIPT_URL.length + 50;
+            
+            if (optimizedUrlSize <= MAX_URL_SIZE) {
+                const compressionRatio = Math.round(optimizedJsonString.length/jsonString.length * 100);
+                return {
+                    success: false,
+                    size: 'large',
+                    message: `Large wireframe detected (${dataSize} characters). Content will be optimized for export (${compressionRatio}% of original size).`,
+                    optimizedData
+                };
+            }
+            
+            // Even optimized data is too large
+            return {
+                success: false,
+                size: 'oversized',
+                message: `Wireframe is too large for Google Docs export (${dataSize} characters). Please remove some sections or reduce content length.`,
+                optimizedData: null
+            };
+        }
+        
+        optimizeContentForExport(docData) {
+            const MAX_FIELD_LENGTH = 200; // Truncate long content
+            
+            const optimized = JSON.parse(JSON.stringify(docData)); // Deep clone
+            
+            // Optimize each section's content
+            optimized.content = optimized.content.map(section => {
+                const optimizedSection = { ...section };
+                
+                // Truncate long content fields
+                if (optimizedSection.content) {
+                    optimizedSection.content = optimizedSection.content.map(item => {
+                        if (item && item.value && item.value.length > MAX_FIELD_LENGTH) {
+                            return {
+                                ...item,
+                                value: item.value.substring(0, MAX_FIELD_LENGTH) + '... [truncated]'
+                            };
+                        }
+                        return item;
+                    }).filter(Boolean); // Remove null/undefined items
+                }
+                
+                return optimizedSection;
+            });
+            
+            return optimized;
         }
         
         convertWireframeToDocFormat(sections) {
