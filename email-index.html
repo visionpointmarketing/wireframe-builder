@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Wireframe Builder</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="email-styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-left">
+                <button id="toggleSidebarBtn" class="btn btn-icon" aria-label="Toggle sidebar" title="Toggle Sidebar (⌘B)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="18" rx="1"/>
+                        <path d="M14 4h7M14 12h7M14 20h7"/>
+                    </svg>
+                </button>
+                <h1>Email Wireframe Builder</h1>
+            </div>
+            
+            <div class="header-center">
+                <div class="viewport-controls">
+                    <button class="viewport-btn active" data-viewport="desktop" title="Email Desktop View (600px)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <rect x="3" y="4" width="18" height="14" rx="2"/>
+                            <line x1="8" y1="21" x2="16" y2="21"/>
+                            <line x1="12" y1="18" x2="12" y2="21"/>
+                        </svg>
+                        <span class="viewport-label">Desktop</span>
+                    </button>
+                    <button class="viewport-btn" data-viewport="tablet" title="Email Tablet View (480px)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <rect x="5" y="2" width="14" height="20" rx="2"/>
+                            <circle cx="12" cy="18" r="1"/>
+                        </svg>
+                        <span class="viewport-label">Tablet</span>
+                    </button>
+                    <button class="viewport-btn" data-viewport="mobile" title="Email Mobile View (320px)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <rect x="7" y="2" width="10" height="20" rx="2"/>
+                            <circle cx="12" cy="18" r="1"/>
+                        </svg>
+                        <span class="viewport-label">Mobile</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <div class="action-group">
+                    <button id="undoBtn" class="btn btn-icon" disabled title="Undo (⌘Z)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 7h12a4 4 0 014 4v5a4 4 0 01-4 4H7M3 7l4-4M3 7l4 4"/>
+                        </svg>
+                    </button>
+                    <button id="redoBtn" class="btn btn-icon" disabled title="Redo (⌘⇧Z)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 7H9a4 4 0 00-4 4v5a4 4 0 004 4h8M21 7l-4-4M21 7l-4 4"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="header-separator"></div>
+                
+                <button id="deleteAllBtn" class="btn btn-secondary btn-sm" title="Delete All Sections">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/>
+                    </svg>
+                    Clear All
+                </button>
+                
+                <div class="header-separator"></div>
+                
+                <button id="importBtn" class="btn btn-icon" title="Import JSON">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                    </svg>
+                </button>
+                <input type="file" id="importFile" accept=".json" style="display: none;">
+                
+                <div class="export-dropdown">
+                    <button id="exportDropdownBtn" class="btn btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                        </svg>
+                        Export
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="dropdown-arrow">
+                            <path d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </button>
+                    <div class="dropdown-menu" id="exportMenu">
+                        <button class="dropdown-item" id="exportImageBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <path d="M21 15l-5-5L5 21"/>
+                            </svg>
+                            Export as PNG
+                            <span class="shortcut">⌘E</span>
+                        </button>
+                        <button class="dropdown-item" id="exportBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                                <path d="M14 2v6h6M10 12h4M10 16h4"/>
+                            </svg>
+                            Export as JSON
+                            <span class="shortcut">⌘J</span>
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" id="googleDocsExportBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                                <path d="M14 2v6h6M9 15h6M9 18h6M9 12h6"/>
+                            </svg>
+                            Copy to Google Docs
+                            <span class="shortcut">⌘G</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h2>Email Components</h2>
+                    <div class="sidebar-search">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                        <input type="text" id="componentSearch" placeholder="Search components..." />
+                    </div>
+                </div>
+                
+                <div class="sidebar-content">
+                    <div class="component-category">
+                        <button class="category-header" data-category="hero">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                            <span>Hero Sections</span>
+                            <svg class="category-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M6 9l6 6 6-6"/>
+                            </svg>
+                        </button>
+                        <div class="category-items expanded">
+                            <button class="section-btn" data-section="hero" data-variant="single-column">
+                                <div class="section-preview">Single Column Hero</div>
+                            </button>
+                            <button class="section-btn" data-section="hero" data-variant="split">
+                                <div class="section-preview">Split Hero</div>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Future sections will be added here in subsequent phases -->
+                    <div class="component-category">
+                        <button class="category-header" data-category="coming-soon" disabled>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                            <span>More Sections Coming Soon</span>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="canvas-area">
+                <div class="canvas desktop" id="canvas">
+                    <div class="empty-state">
+                        <p>Click a section from the library to get started</p>
+                    </div>
+                </div>
+                
+                <!-- Educational Guidance Panel -->
+                <div class="guidance-panel" id="guidancePanel">
+                    <h3>Writing Tips</h3>
+                    <div class="guidance-content" id="guidanceContent">
+                        <p>Click on any text element to see specific writing guidance.</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Form Builder Modal -->
+    <div class="modal-backdrop" id="formBuilderBackdrop" style="display: none;">
+        <div class="modal-container form-builder-modal">
+            <div class="modal-header">
+                <h2>Customize Lead Generation Form</h2>
+                <button class="modal-close" id="closeFormBuilder" aria-label="Close form builder">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-builder-layout">
+                    <!-- Left Panel: Fields List -->
+                    <div class="form-builder-fields">
+                        <div class="fields-header">
+                            <h3>Form Fields</h3>
+                            <button class="btn btn-primary btn-sm" id="addFieldBtn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 5v14M5 12h14"/>
+                                </svg>
+                                Add Field
+                            </button>
+                        </div>
+                        
+                        <div class="fields-list" id="formFieldsList">
+                            <!-- Fields will be dynamically added here -->
+                        </div>
+                        
+                        <!-- Field Type Selector (initially hidden) -->
+                        <div class="field-type-selector" id="fieldTypeSelector" style="display: none;">
+                            <h4>Select Field Type</h4>
+                            <div class="field-type-grid">
+                                <button class="field-type-btn" data-type="text">
+                                    <span class="field-type-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M7 12h10M12 7v10M5 3h14M10 3v18M14 3v18M5 21h14"/>
+                                        </svg>
+                                    </span>
+                                    <span>Text Input</span>
+                                </button>
+                                <button class="field-type-btn" data-type="email">
+                                    <span class="field-type-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="2" y="4" width="20" height="16" rx="2"/>
+                                            <path d="M22 7l-10 5L2 7"/>
+                                        </svg>
+                                    </span>
+                                    <span>Email</span>
+                                </button>
+                                <button class="field-type-btn" data-type="tel">
+                                    <span class="field-type-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+                                        </svg>
+                                    </span>
+                                    <span>Phone</span>
+                                </button>
+                                <button class="field-type-btn" data-type="number">
+                                    <span class="field-type-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M6 2v20M18 2v20M2 12h4M18 12h4M9 7h6M9 17h6"/>
+                                        </svg>
+                                    </span>
+                                    <span>Number</span>
+                                </button>
+                                <button class="field-type-btn" data-type="date">
+                                    <span class="field-type-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="4" width="18" height="18" rx="2"/>
+                                            <path d="M16 2v4M8 2v4M3 10h18"/>
+                                        </svg>
+                                    </span>
+                                    <span>Date</span>
+                                </button>
+                                <button class="field-type-btn" data-type="select">
+                                    <span class="field-type-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                                            <path d="M17 9l3 3-3 3"/>
+                                        </svg>
+                                    </span>
+                                    <span>Dropdown</span>
+                                </button>
+                                <button class="field-type-btn" data-type="radio">
+                                    <span class="field-type-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="9"/>
+                                            <circle cx="12" cy="12" r="4" fill="currentColor"/>
+                                        </svg>
+                                    </span>
+                                    <span>Radio</span>
+                                </button>
+                                <button class="field-type-btn" data-type="checkbox">
+                                    <span class="field-type-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                            <path d="M9 12l2 2 4-4"/>
+                                        </svg>
+                                    </span>
+                                    <span>Checkbox</span>
+                                </button>
+                                <button class="field-type-btn" data-type="textarea">
+                                    <span class="field-type-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                            <path d="M7 7h10M7 12h10M7 17h7"/>
+                                        </svg>
+                                    </span>
+                                    <span>Textarea</span>
+                                </button>
+                                <button class="field-type-btn" data-type="consent">
+                                    <span class="field-type-icon">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                            <path d="M9 12l2 2 4-4" stroke-width="2.5"/>
+                                        </svg>
+                                    </span>
+                                    <span>Consent</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Panel: Field Properties -->
+                    <div class="form-builder-properties">
+                        <h3>Field Properties</h3>
+                        <div class="properties-content" id="fieldProperties">
+                            <div class="empty-properties">
+                                <p>Select a field to edit its properties</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Templates -->
+                <div class="form-templates">
+                    <h4>Quick Start Templates</h4>
+                    <div class="template-buttons">
+                        <button class="template-btn" data-template="basic">Basic Contact</button>
+                        <button class="template-btn" data-template="event">Event Registration</button>
+                        <button class="template-btn" data-template="inquiry">Program Inquiry</button>
+                        <button class="template-btn" data-template="newsletter">Newsletter Signup</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelFormBuilder">Cancel</button>
+                <button class="btn btn-primary" id="saveFormBuilder">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- html2canvas library for image export -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" 
+            integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" 
+            crossorigin="anonymous"></script>
+    <!-- LZ-string library for data compression -->
+    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.js" 
+            integrity="sha384-UUNhTQPpD5EauoPuBAUjidWU5IdwEgPXkWHeiWm2x+relzznzGuC9YYa8QGV93P5" 
+            crossorigin="anonymous"></script>
+    <script src="email-script.js"></script>
+</body>
+</html>
