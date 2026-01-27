@@ -1,4 +1,4 @@
-import { escapeHtml, renderIfVisible, wrapSection } from '../utils.js';
+import { escapeHtml, renderIfVisible, wrapSection, renderImagePlaceholder } from '../utils.js';
 
 export default {
     type: 'program-cards',
@@ -45,7 +45,7 @@ export default {
             <div class="program-grid">
                 ${data.programs.map((program, i) => `
                     <div class="program-card" data-program-index="${i}">
-                        <div class="program-image">Image Placeholder</div>
+                        ${renderImagePlaceholder('program' + i, data.images, 'program-image', 'Image Placeholder')}
                         <div class="program-content">
                             <h3 class="program-title editable" contenteditable="true" data-field="program-title-${i}">${program.title}</h3>
                             <p class="program-description editable" contenteditable="true" data-field="program-description-${i}">${program.description}</p>

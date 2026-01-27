@@ -1,4 +1,4 @@
-import { escapeHtml, renderIfVisible, wrapSection } from '../utils.js';
+import { escapeHtml, renderIfVisible, wrapSection, renderImagePlaceholder } from '../utils.js';
 
 export default {
     type: 'testimonial-single',
@@ -31,7 +31,7 @@ export default {
         const inner = `
             <div class="testimonial-layout">
                 <div class="testimonial-image-large">
-                    <div class="profile-placeholder">Profile Image</div>
+                    ${renderImagePlaceholder('profile', data.images, 'profile-placeholder', 'Profile Image')}
                 </div>
                 <div class="testimonial-content-large">
                     <div class="testimonial-header">

@@ -40,10 +40,16 @@ export class GoogleDocsExporter {
     formatSectionContent(section) {
         const template = sectionTemplates[section.type];
         if (template && template.toDocFormat) {
+            const content = template.toDocFormat(section);
+            // Note any uploaded images
+            const images = section.content && section.content.images;
+            if (images && Object.keys(images).length > 0) {
+                content.push({ label: 'Images', value: `[${Object.keys(images).length} user-uploaded image(s)]` });
+            }
             return {
                 type: template.name,
                 variant: section.variant,
-                content: template.toDocFormat(section)
+                content
             };
         }
 

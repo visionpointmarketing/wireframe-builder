@@ -1,4 +1,4 @@
-import { escapeHtml, renderIfVisible, wrapSection } from '../utils.js';
+import { escapeHtml, renderIfVisible, wrapSection, renderImagePlaceholder } from '../utils.js';
 
 const LAYOUT_BTN = '<button class="control-btn layout-btn" aria-label="Toggle layout direction">Toggle Layout</button>';
 
@@ -34,7 +34,7 @@ export default {
         const inner = `
             <div class="image-content-grid ${layoutDirection === 'reversed' ? 'reversed' : ''}">
                 <div class="image-column">
-                    <div class="content-image">Image Placeholder</div>
+                    ${renderImagePlaceholder('main', data.images, 'content-image', 'Image Placeholder')}
                 </div>
                 <div class="content-column">
                     ${renderIfVisible('eyebrow', `<div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>`, visibility)}

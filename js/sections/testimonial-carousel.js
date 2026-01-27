@@ -1,4 +1,4 @@
-import { escapeHtml, renderIfVisible, wrapSection } from '../utils.js';
+import { escapeHtml, renderIfVisible, wrapSection, renderImagePlaceholder } from '../utils.js';
 
 export default {
     type: 'testimonial-carousel',
@@ -42,7 +42,7 @@ export default {
             <div class="testimonial-carousel-container">
                 <div class="testimonial-slide active">
                     <div class="testimonial-profile">
-                        <div class="profile-circle">Profile</div>
+                        ${renderImagePlaceholder('profile0', data.images, 'profile-circle', 'Profile')}
                     </div>
                     <blockquote class="testimonial-quote editable" contenteditable="true" data-field="testimonial-quote-0">"${sanitizedTestimonial.quote}"</blockquote>
                     <div class="testimonial-info">

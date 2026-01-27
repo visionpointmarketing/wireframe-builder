@@ -1,13 +1,16 @@
 import { state } from './state.js';
 import { saveToHistory } from './state.js';
 import sectionTemplates from './sections/index.js';
+import { gc } from './image-store.js';
 
 let canvasEl = null;
 let formBuilderRef = null;
+let imageUploadModalRef = null;
 
-export function initCanvas(canvas, formBuilder) {
+export function initCanvas(canvas, formBuilder, imageUploadModal) {
     canvasEl = canvas;
     formBuilderRef = formBuilder;
+    imageUploadModalRef = imageUploadModal;
 }
 
 // Get default visibility from section template fields
@@ -139,6 +142,11 @@ export function saveContentFromEditable() {
             content.fields = state.sections[index].content.fields;
         }
 
+        // Preserve uploaded images
+        if (state.sections[index].content.images) {
+            content.images = state.sections[index].content.images;
+        }
+
         state.sections[index].content = content;
     });
 }
@@ -186,6 +194,7 @@ export const eventHandlers = {
         if (confirm('Are you sure you want to delete this section?')) {
             state.sections.splice(index, 1);
             updateCanvas();
+            gc(state.sections);
         }
     },
 
@@ -335,6 +344,18 @@ export function setupCanvasEvents() {
             eventHandlers.toggleCustomizePopover(e.target.closest('.customize-btn') || e.target);
         } else if (e.target.classList.contains('delete-btn')) {
             eventHandlers.deleteSection(e.target);
+        } else {
+            // Image placeholder click
+            const wrapper = e.target.closest('.image-placeholder-wrapper');
+            if (wrapper && imageUploadModalRef) {
+                const section = wrapper.closest('.section');
+                const sections = Array.from(canvasEl.querySelectorAll('.section'));
+                const sectionIndex = sections.indexOf(section);
+                const imageSlot = wrapper.dataset.imageSlot;
+                if (sectionIndex !== -1 && imageSlot) {
+                    imageUploadModalRef.open(sectionIndex, imageSlot);
+                }
+            }
         }
     });
 

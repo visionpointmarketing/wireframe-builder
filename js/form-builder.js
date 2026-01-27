@@ -6,23 +6,23 @@ export class FormBuilder {
         this.updateCanvas = updateCanvasFn;
         this.modal = document.getElementById('formBuilderBackdrop');
         this.fieldsList = document.getElementById('formFieldsList');
-        this.fieldProperties = document.getElementById('fieldProperties');
         this.fieldTypeSelector = document.getElementById('fieldTypeSelector');
+        this.fieldCountEl = document.getElementById('fbFieldCount');
         this.currentSectionIndex = null;
-        this.selectedFieldId = null;
+        this.expandedFieldId = null;
         this.formFields = [];
 
         this.fieldTypes = {
-            text: { label: 'Text Input', defaultLabel: 'Text Field' },
-            email: { label: 'Email', defaultLabel: 'Email Address' },
-            tel: { label: 'Phone', defaultLabel: 'Phone Number' },
-            number: { label: 'Number', defaultLabel: 'Number' },
-            date: { label: 'Date', defaultLabel: 'Date' },
-            select: { label: 'Dropdown', defaultLabel: 'Select Option' },
-            radio: { label: 'Radio', defaultLabel: 'Radio Group' },
-            checkbox: { label: 'Checkbox', defaultLabel: 'Checkbox' },
-            textarea: { label: 'Textarea', defaultLabel: 'Comments' },
-            consent: { label: 'Consent', defaultLabel: 'I agree to the terms' }
+            text: { label: 'Text Input', shortLabel: 'text', defaultLabel: 'Text Field' },
+            email: { label: 'Email', shortLabel: 'email', defaultLabel: 'Email Address' },
+            tel: { label: 'Phone', shortLabel: 'tel', defaultLabel: 'Phone Number' },
+            number: { label: 'Number', shortLabel: 'number', defaultLabel: 'Number' },
+            date: { label: 'Date', shortLabel: 'date', defaultLabel: 'Date' },
+            select: { label: 'Dropdown', shortLabel: 'select', defaultLabel: 'Select Option' },
+            radio: { label: 'Radio', shortLabel: 'radio', defaultLabel: 'Radio Group' },
+            checkbox: { label: 'Checkbox', shortLabel: 'checkbox', defaultLabel: 'Checkbox' },
+            textarea: { label: 'Textarea', shortLabel: 'textarea', defaultLabel: 'Comments' },
+            consent: { label: 'Consent', shortLabel: 'consent', defaultLabel: 'I agree to the terms' }
         };
 
         this.templates = {
@@ -77,7 +77,7 @@ export class FormBuilder {
         document.getElementById('closeFormBuilder').addEventListener('click', () => this.close());
         document.getElementById('cancelFormBuilder').addEventListener('click', () => this.close());
         document.getElementById('saveFormBuilder').addEventListener('click', () => this.save());
-        document.getElementById('addFieldBtn').addEventListener('click', () => this.showFieldTypeSelector());
+        document.getElementById('addFieldBtn').addEventListener('click', () => this.toggleFieldTypeSelector());
 
         document.querySelectorAll('.field-type-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -91,7 +91,7 @@ export class FormBuilder {
         });
 
         this.modal.addEventListener('click', (e) => {
-            if (!e.target.closest('.field-type-selector') && !e.target.closest('#addFieldBtn')) {
+            if (!e.target.closest('.fb-add-dropdown') && !e.target.closest('#addFieldBtn')) {
                 this.hideFieldTypeSelector();
             }
         });
@@ -114,6 +114,7 @@ export class FormBuilder {
                 if (!field.id) field.id = this.generateFieldId();
             });
 
+            this.expandedFieldId = null;
             this.renderFields();
             this.modal.style.display = 'flex';
         }
@@ -122,10 +123,12 @@ export class FormBuilder {
     close() {
         this.modal.style.display = 'none';
         this.hideFieldTypeSelector();
-        this.selectedFieldId = null;
+        this.expandedFieldId = null;
     }
 
     save() {
+        // Capture any open inline edits before saving
+        this.captureInlineEdits();
         if (this.currentSectionIndex !== null) {
             const section = state.sections[this.currentSectionIndex];
             if (section && section.type === 'lead-form') {
@@ -136,11 +139,51 @@ export class FormBuilder {
         }
     }
 
+    captureInlineEdits() {
+        if (!this.expandedFieldId) return;
+        const field = this.formFields.find(f => f.id === this.expandedFieldId);
+        if (!field) return;
+
+        const panel = this.fieldsList.querySelector(`.field-card.expanded .field-properties-panel`);
+        if (!panel) return;
+
+        const labelInput = panel.querySelector('[data-prop="label"]');
+        const placeholderInput = panel.querySelector('[data-prop="placeholder"]');
+        const requiredInput = panel.querySelector('[data-prop="required"]');
+        const helpTextInput = panel.querySelector('[data-prop="helpText"]');
+
+        if (labelInput) field.label = labelInput.value;
+        if (placeholderInput) field.placeholder = placeholderInput.value;
+        if (requiredInput) field.required = requiredInput.checked;
+        if (helpTextInput) field.helpText = helpTextInput.value;
+
+        // Options
+        panel.querySelectorAll('input[data-option-index]').forEach(input => {
+            const idx = parseInt(input.dataset.optionIndex);
+            if (field.options && field.options[idx] !== undefined) {
+                field.options[idx] = input.value;
+            }
+        });
+
+        // Number min/max
+        const minInput = panel.querySelector('[data-prop="min"]');
+        const maxInput = panel.querySelector('[data-prop="max"]');
+        if (minInput) field.min = minInput.value ? parseInt(minInput.value) : null;
+        if (maxInput) field.max = maxInput.value ? parseInt(maxInput.value) : null;
+
+        // Textarea rows
+        const rowsInput = panel.querySelector('[data-prop="rows"]');
+        if (rowsInput) field.rows = parseInt(rowsInput.value) || 4;
+    }
+
     generateFieldId() {
         return 'field_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
 
     addField(type) {
+        // Capture current edits before changing expanded state
+        this.captureInlineEdits();
+
         const fieldType = this.fieldTypes[type];
         const field = {
             id: this.generateFieldId(),
@@ -158,65 +201,92 @@ export class FormBuilder {
         if (type === 'textarea') { field.rows = 4; }
 
         this.formFields.push(field);
+        this.expandedFieldId = field.id;
         this.renderFields();
-        this.selectField(field.id);
+
+        // Scroll new field into view
+        const newCard = this.fieldsList.querySelector(`[data-field-id="${field.id}"]`);
+        if (newCard) newCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     removeField(fieldId) {
         const index = this.formFields.findIndex(f => f.id === fieldId);
         if (index > -1) {
             this.formFields.splice(index, 1);
-            this.renderFields();
-            if (this.selectedFieldId === fieldId) {
-                this.selectedFieldId = null;
-                this.renderProperties();
+            if (this.expandedFieldId === fieldId) {
+                this.expandedFieldId = null;
             }
+            this.renderFields();
         }
     }
 
-    selectField(fieldId) {
-        this.selectedFieldId = fieldId;
-        document.querySelectorAll('.field-item').forEach(item => {
-            item.classList.toggle('active', item.dataset.fieldId === fieldId);
-        });
-        this.renderProperties();
+    toggleExpand(fieldId) {
+        // Capture edits from currently expanded field before switching
+        this.captureInlineEdits();
+
+        if (this.expandedFieldId === fieldId) {
+            this.expandedFieldId = null;
+        } else {
+            this.expandedFieldId = fieldId;
+        }
+        this.renderFields();
     }
 
     renderFields() {
-        this.fieldsList.innerHTML = this.formFields.map((field, index) => {
-            const fieldType = this.fieldTypes[field.type];
+        const count = this.formFields.length;
+        this.fieldCountEl.textContent = `${count} field${count !== 1 ? 's' : ''}`;
+
+        this.fieldsList.innerHTML = this.formFields.map((field) => {
+            const ft = this.fieldTypes[field.type];
+            const isExpanded = this.expandedFieldId === field.id;
+
+            let propertiesHtml = '';
+            if (isExpanded) {
+                propertiesHtml = this.renderInlineProperties(field);
+            }
+
             return `
-                <div class="field-item" data-field-id="${field.id}" data-index="${index}">
-                    <div class="field-drag-handle">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 3h6M9 7h6M9 11h6M9 15h6M9 19h6"/>
-                        </svg>
-                    </div>
-                    <div class="field-info">
-                        <div class="field-label">
-                            ${escapeHtml(field.label)}
-                            ${field.required ? '<span class="field-required">*</span>' : ''}
+                <div class="field-card${isExpanded ? ' expanded' : ''}" data-field-id="${field.id}">
+                    <div class="field-card-header">
+                        <div class="field-drag-handle" draggable="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 3h6M9 7h6M9 11h6M9 15h6M9 19h6"/>
+                            </svg>
                         </div>
-                        <div class="field-type">${fieldType.label}</div>
+                        <div class="field-card-info">
+                            <span class="field-card-label">${escapeHtml(field.label)}</span>
+                            ${field.required ? '<span class="field-required">*</span>' : ''}
+                            <span class="field-card-type">${ft.shortLabel}</span>
+                        </div>
+                        <div class="field-card-actions">
+                            <button class="field-expand-btn" data-field-id="${field.id}" title="${isExpanded ? 'Collapse' : 'Expand'}">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M6 9l6 6 6-6"/>
+                                </svg>
+                            </button>
+                            <button class="field-delete-btn" data-field-id="${field.id}" title="Delete field">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 6L6 18M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    <button class="field-delete" data-field-id="${field.id}">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M18 6L6 18M6 6l12 12"/>
-                        </svg>
-                    </button>
+                    ${propertiesHtml}
                 </div>
             `;
         }).join('');
 
-        this.fieldsList.querySelectorAll('.field-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                if (!e.target.closest('.field-delete')) {
-                    this.selectField(item.dataset.fieldId);
-                }
+        // Bind events
+        this.fieldsList.querySelectorAll('.field-card-header').forEach(header => {
+            header.addEventListener('click', (e) => {
+                if (e.target.closest('.field-delete-btn')) return;
+                if (e.target.closest('.field-drag-handle')) return;
+                const fieldId = header.closest('.field-card').dataset.fieldId;
+                this.toggleExpand(fieldId);
             });
         });
 
-        this.fieldsList.querySelectorAll('.field-delete').forEach(btn => {
+        this.fieldsList.querySelectorAll('.field-delete-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 if (confirm('Delete this field?')) {
                     this.removeField(btn.dataset.fieldId);
@@ -224,141 +294,163 @@ export class FormBuilder {
             });
         });
 
+        // Inline property change handlers
+        this.fieldsList.querySelectorAll('.field-properties-panel input, .field-properties-panel select, .field-properties-panel textarea').forEach(input => {
+            input.addEventListener('input', () => this.handleInlinePropertyChange(input));
+        });
+
+        // Option remove buttons
+        this.fieldsList.querySelectorAll('.option-remove').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.captureInlineEdits();
+                const field = this.formFields.find(f => f.id === this.expandedFieldId);
+                if (!field || !field.options) return;
+                const idx = parseInt(btn.dataset.optionIndex);
+                field.options.splice(idx, 1);
+                this.renderFields();
+            });
+        });
+
+        // Add option buttons
+        this.fieldsList.querySelectorAll('.add-option-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.captureInlineEdits();
+                const field = this.formFields.find(f => f.id === this.expandedFieldId);
+                if (!field || !field.options) return;
+                field.options.push(`Option ${field.options.length + 1}`);
+                this.renderFields();
+            });
+        });
+
         this.initFieldDragDrop();
     }
 
-    renderProperties() {
-        const field = this.formFields.find(f => f.id === this.selectedFieldId);
+    renderInlineProperties(field) {
+        let html = `<div class="field-properties-panel">`;
 
-        if (!field) {
-            this.fieldProperties.innerHTML = `<div class="empty-properties"><p>Select a field to edit its properties</p></div>`;
-            return;
-        }
-
-        let propertiesHtml = `
-            <div class="property-group">
-                <label>Field Label</label>
-                <input type="text" id="fieldLabel" value="${escapeHtml(field.label || '')}">
+        html += `
+            <div class="property-row">
+                <label>Label</label>
+                <input type="text" data-prop="label" value="${escapeHtml(field.label || '')}">
             </div>
-            <div class="property-group">
-                <label>Placeholder Text</label>
-                <input type="text" id="fieldPlaceholder" value="${escapeHtml(field.placeholder || '')}">
+            <div class="property-row">
+                <label>Placeholder</label>
+                <input type="text" data-prop="placeholder" value="${escapeHtml(field.placeholder || '')}">
             </div>
-            <div class="property-group">
-                <label class="checkbox-label">
-                    <input type="checkbox" id="fieldRequired" ${field.required ? 'checked' : ''}>
-                    Required Field
-                </label>
+            <div class="checkbox-row">
+                <input type="checkbox" data-prop="required" ${field.required ? 'checked' : ''}>
+                <span>Required</span>
             </div>
-            <div class="property-group">
+            <div class="property-row">
                 <label>Help Text</label>
-                <input type="text" id="fieldHelpText" value="${escapeHtml(field.helpText || '')}">
+                <input type="text" data-prop="helpText" value="${escapeHtml(field.helpText || '')}">
             </div>
         `;
 
         if (field.type === 'select' || field.type === 'radio' || field.type === 'checkbox') {
-            propertiesHtml += `
-                <div class="property-group">
+            html += `
+                <div class="property-row">
                     <label>Options</label>
                     <div class="options-list">
-                        ${(field.options || []).map((option, index) => `
+                        ${(field.options || []).map((opt, i) => `
                             <div class="option-item">
-                                <input type="text" value="${escapeHtml(option)}" data-option-index="${index}">
-                                <button class="option-remove" data-option-index="${index}">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <input type="text" value="${escapeHtml(opt)}" data-option-index="${i}">
+                                <button class="option-remove" data-option-index="${i}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M18 6L6 18M6 6l12 12"/>
                                     </svg>
                                 </button>
                             </div>
                         `).join('')}
                     </div>
-                    <button class="btn btn-secondary btn-sm add-option-btn">Add Option</button>
+                    <button class="btn btn-secondary btn-sm add-option-btn" style="margin-top: var(--space-sm)">Add Option</button>
                 </div>
             `;
         }
 
         if (field.type === 'number') {
-            propertiesHtml += `
-                <div class="property-group">
-                    <label>Minimum Value</label>
-                    <input type="number" id="fieldMin" value="${field.min || ''}">
+            html += `
+                <div class="property-row">
+                    <label>Min Value</label>
+                    <input type="number" data-prop="min" value="${field.min != null ? field.min : ''}">
                 </div>
-                <div class="property-group">
-                    <label>Maximum Value</label>
-                    <input type="number" id="fieldMax" value="${field.max || ''}">
+                <div class="property-row">
+                    <label>Max Value</label>
+                    <input type="number" data-prop="max" value="${field.max != null ? field.max : ''}">
                 </div>
             `;
         }
 
         if (field.type === 'textarea') {
-            propertiesHtml += `
-                <div class="property-group">
-                    <label>Number of Rows</label>
-                    <input type="number" id="fieldRows" value="${field.rows || 4}" min="1" max="10">
+            html += `
+                <div class="property-row">
+                    <label>Rows</label>
+                    <input type="number" data-prop="rows" value="${field.rows || 4}" min="1" max="10">
                 </div>
             `;
         }
 
-        this.fieldProperties.innerHTML = propertiesHtml;
-
-        this.fieldProperties.querySelectorAll('input').forEach(input => {
-            input.addEventListener('input', () => this.updateFieldProperty(input));
-        });
-
-        this.fieldProperties.querySelectorAll('.option-remove').forEach(btn => {
-            btn.addEventListener('click', () => this.removeOption(parseInt(btn.dataset.optionIndex)));
-        });
-
-        const addOptionBtn = this.fieldProperties.querySelector('.add-option-btn');
-        if (addOptionBtn) {
-            addOptionBtn.addEventListener('click', () => this.addOption());
-        }
+        html += `</div>`;
+        return html;
     }
 
-    updateFieldProperty(input) {
-        const field = this.formFields.find(f => f.id === this.selectedFieldId);
+    handleInlinePropertyChange(input) {
+        const field = this.formFields.find(f => f.id === this.expandedFieldId);
         if (!field) return;
 
-        switch (input.id) {
-            case 'fieldLabel': field.label = input.value; break;
-            case 'fieldPlaceholder': field.placeholder = input.value; break;
-            case 'fieldRequired': field.required = input.checked; break;
-            case 'fieldHelpText': field.helpText = input.value; break;
-            case 'fieldMin': field.min = input.value ? parseInt(input.value) : null; break;
-            case 'fieldMax': field.max = input.value ? parseInt(input.value) : null; break;
-            case 'fieldRows': field.rows = parseInt(input.value) || 4; break;
+        const prop = input.dataset.prop;
+        if (prop === 'label') {
+            field.label = input.value;
+            // Update the label in the header row live
+            const card = input.closest('.field-card');
+            const labelSpan = card.querySelector('.field-card-label');
+            if (labelSpan) labelSpan.textContent = input.value;
+        } else if (prop === 'placeholder') {
+            field.placeholder = input.value;
+        } else if (prop === 'required') {
+            field.required = input.checked;
+            // Update the asterisk live
+            const card = input.closest('.field-card');
+            const reqSpan = card.querySelector('.field-required');
+            if (input.checked && !reqSpan) {
+                const labelSpan = card.querySelector('.field-card-label');
+                labelSpan.insertAdjacentHTML('afterend', '<span class="field-required">*</span>');
+            } else if (!input.checked && reqSpan) {
+                reqSpan.remove();
+            }
+        } else if (prop === 'helpText') {
+            field.helpText = input.value;
+        } else if (prop === 'min') {
+            field.min = input.value ? parseInt(input.value) : null;
+        } else if (prop === 'max') {
+            field.max = input.value ? parseInt(input.value) : null;
+        } else if (prop === 'rows') {
+            field.rows = parseInt(input.value) || 4;
         }
 
+        // Handle option edits
         if (input.dataset.optionIndex !== undefined) {
-            const index = parseInt(input.dataset.optionIndex);
-            if (field.options && field.options[index] !== undefined) {
-                field.options[index] = input.value;
+            const idx = parseInt(input.dataset.optionIndex);
+            if (field.options && field.options[idx] !== undefined) {
+                field.options[idx] = input.value;
             }
         }
-
-        this.renderFields();
     }
 
-    addOption() {
-        const field = this.formFields.find(f => f.id === this.selectedFieldId);
-        if (!field || !field.options) return;
-        field.options.push(`Option ${field.options.length + 1}`);
-        this.renderProperties();
-    }
-
-    removeOption(index) {
-        const field = this.formFields.find(f => f.id === this.selectedFieldId);
-        if (!field || !field.options) return;
-        field.options.splice(index, 1);
-        this.renderProperties();
-    }
-
-    showFieldTypeSelector() {
-        this.fieldTypeSelector.style.display = 'block';
+    toggleFieldTypeSelector() {
+        const addBtn = document.getElementById('addFieldBtn');
+        if (this.fieldTypeSelector.style.display === 'none') {
+            this.fieldTypeSelector.style.display = 'block';
+            addBtn.classList.add('active');
+        } else {
+            this.hideFieldTypeSelector();
+        }
     }
 
     hideFieldTypeSelector() {
         this.fieldTypeSelector.style.display = 'none';
+        const addBtn = document.getElementById('addFieldBtn');
+        if (addBtn) addBtn.classList.remove('active');
     }
 
     loadTemplate(templateName) {
@@ -370,32 +462,30 @@ export class FormBuilder {
                 ...field,
                 id: this.generateFieldId()
             }));
+            this.expandedFieldId = null;
             this.renderFields();
-            this.selectedFieldId = null;
-            this.renderProperties();
         }
     }
 
     initFieldDragDrop() {
         let draggedElement = null;
 
-        this.fieldsList.querySelectorAll('.field-item').forEach((item) => {
-            const handle = item.querySelector('.field-drag-handle');
+        this.fieldsList.querySelectorAll('.field-card').forEach((card) => {
+            const handle = card.querySelector('.field-drag-handle');
             handle.style.cursor = 'grab';
-            handle.draggable = true;
 
             handle.addEventListener('dragstart', (e) => {
                 e.dataTransfer.effectAllowed = 'move';
-                draggedElement = item;
-                item.classList.add('dragging');
-                e.dataTransfer.setDragImage(item, 0, 0);
+                draggedElement = card;
+                card.classList.add('dragging');
+                e.dataTransfer.setDragImage(card, 0, 0);
             });
 
             handle.addEventListener('dragend', () => {
                 if (draggedElement) {
                     draggedElement.classList.remove('dragging');
                     draggedElement = null;
-                    const newOrder = Array.from(this.fieldsList.querySelectorAll('.field-item')).map(el =>
+                    const newOrder = Array.from(this.fieldsList.querySelectorAll('.field-card')).map(el =>
                         this.formFields.find(f => f.id === el.dataset.fieldId)
                     ).filter(Boolean);
                     this.formFields = newOrder;
@@ -406,25 +496,21 @@ export class FormBuilder {
             handle.addEventListener('mouseup', () => { handle.style.cursor = 'grab'; });
             handle.addEventListener('mouseleave', () => { handle.style.cursor = 'grab'; });
 
-            item.addEventListener('dragover', (e) => {
+            card.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 e.dataTransfer.dropEffect = 'move';
-                const draggingItem = this.fieldsList.querySelector('.dragging');
-                if (!draggingItem || draggingItem === item) return;
-                const siblings = [...this.fieldsList.querySelectorAll('.field-item:not(.dragging)')];
+                const draggingCard = this.fieldsList.querySelector('.dragging');
+                if (!draggingCard || draggingCard === card) return;
+                const siblings = [...this.fieldsList.querySelectorAll('.field-card:not(.dragging)')];
                 const nextSibling = siblings.find(sibling => {
                     const rect = sibling.getBoundingClientRect();
                     return e.clientY < rect.top + rect.height / 2;
                 });
                 if (nextSibling) {
-                    this.fieldsList.insertBefore(draggingItem, nextSibling);
+                    this.fieldsList.insertBefore(draggingCard, nextSibling);
                 } else {
-                    this.fieldsList.appendChild(draggingItem);
+                    this.fieldsList.appendChild(draggingCard);
                 }
-            });
-
-            item.addEventListener('dragstart', (e) => {
-                if (!e.target.closest('.field-drag-handle')) e.preventDefault();
             });
         });
     }

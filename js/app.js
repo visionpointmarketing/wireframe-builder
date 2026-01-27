@@ -1,6 +1,7 @@
 import { state, initStateRefs, saveToHistory } from './state.js';
 import { initCanvas, updateCanvas, saveContentFromEditable, setupCanvasEvents, initializeDragAndDrop, addSection } from './canvas.js';
 import { FormBuilder } from './form-builder.js';
+import { ImageUploadModal } from './image-upload-modal.js';
 import { GoogleDocsExporter } from './google-docs-exporter.js';
 import { initializeGuidance } from './writing-guidelines.js';
 import { generateSidebar, setupSidebarEnhancements, setupExportDropdown, setupEventListeners, exportJSON, exportAsImage, handleImport } from './ui.js';
@@ -96,7 +97,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize canvas module
     const formBuilder = new FormBuilder(updateCanvas);
-    initCanvas(canvas, formBuilder);
+    const imageUploadModal = new ImageUploadModal(updateCanvas);
+    initCanvas(canvas, formBuilder, imageUploadModal);
 
     // Initialize Google Docs exporter
     const googleDocsExporter = new GoogleDocsExporter(config || {});

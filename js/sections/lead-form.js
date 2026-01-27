@@ -1,4 +1,4 @@
-import { escapeHtml, renderIfVisible, wrapSection, unescapeHtml } from '../utils.js';
+import { escapeHtml, renderIfVisible, wrapSection, unescapeHtml, renderImagePlaceholder } from '../utils.js';
 
 const EXTRA_CONTROLS = `
     <button class="control-btn layout-btn" aria-label="Toggle layout direction">Toggle Layout</button>
@@ -125,7 +125,7 @@ export default {
                     </form>
                 </div>
                 <div class="form-image">
-                    <div class="decorative-graphic">Image Placeholder</div>
+                    ${renderImagePlaceholder('decorative', data.images, 'decorative-graphic', 'Image Placeholder')}
                 </div>
             </div>
         `;

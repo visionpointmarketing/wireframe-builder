@@ -95,7 +95,7 @@
     /* Content — dark mode */
     --content-dark-bg: var(--color-brand-secondary);
     --content-dark-text: white;
-    --content-dark-text-secondary: rgba(255, 255, 255, 0.8);
+    --content-dark-text-secondary: rgba(255, 255, 255, 0.85);
     --content-dark-accent: white;
     --content-dark-button-bg: white;
     --content-dark-button-text: var(--color-brand-secondary);

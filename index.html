@@ -162,153 +162,129 @@
     <div class="modal-backdrop" id="formBuilderBackdrop" style="display: none;">
         <div class="modal-container form-builder-modal">
             <div class="modal-header">
-                <h2>Customize Lead Generation Form</h2>
+                <h2>Customize Form Fields</h2>
                 <button class="modal-close" id="closeFormBuilder" aria-label="Close form builder">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M18 6L6 18M6 6l12 12"/>
                     </svg>
                 </button>
             </div>
-            
+
             <div class="modal-body">
-                <div class="form-builder-layout">
-                    <!-- Left Panel: Fields List -->
-                    <div class="form-builder-fields">
-                        <div class="fields-header">
-                            <h3>Form Fields</h3>
-                            <button class="btn btn-primary btn-sm" id="addFieldBtn">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M12 5v14M5 12h14"/>
-                                </svg>
-                                Add Field
-                            </button>
-                        </div>
-                        
-                        <div class="fields-list" id="formFieldsList">
-                            <!-- Fields will be dynamically added here -->
-                        </div>
-                        
-                        <!-- Field Type Selector (initially hidden) -->
-                        <div class="field-type-selector" id="fieldTypeSelector" style="display: none;">
-                            <h4>Select Field Type</h4>
-                            <div class="field-type-grid">
-                                <button class="field-type-btn" data-type="text">
-                                    <span class="field-type-icon">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M7 12h10M12 7v10M5 3h14M10 3v18M14 3v18M5 21h14"/>
-                                        </svg>
-                                    </span>
-                                    <span>Text Input</span>
-                                </button>
-                                <button class="field-type-btn" data-type="email">
-                                    <span class="field-type-icon">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <rect x="2" y="4" width="20" height="16" rx="2"/>
-                                            <path d="M22 7l-10 5L2 7"/>
-                                        </svg>
-                                    </span>
-                                    <span>Email</span>
-                                </button>
-                                <button class="field-type-btn" data-type="tel">
-                                    <span class="field-type-icon">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
-                                        </svg>
-                                    </span>
-                                    <span>Phone</span>
-                                </button>
-                                <button class="field-type-btn" data-type="number">
-                                    <span class="field-type-icon">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M6 2v20M18 2v20M2 12h4M18 12h4M9 7h6M9 17h6"/>
-                                        </svg>
-                                    </span>
-                                    <span>Number</span>
-                                </button>
-                                <button class="field-type-btn" data-type="date">
-                                    <span class="field-type-icon">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <rect x="3" y="4" width="18" height="18" rx="2"/>
-                                            <path d="M16 2v4M8 2v4M3 10h18"/>
-                                        </svg>
-                                    </span>
-                                    <span>Date</span>
-                                </button>
-                                <button class="field-type-btn" data-type="select">
-                                    <span class="field-type-icon">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-                                            <path d="M17 9l3 3-3 3"/>
-                                        </svg>
-                                    </span>
-                                    <span>Dropdown</span>
-                                </button>
-                                <button class="field-type-btn" data-type="radio">
-                                    <span class="field-type-icon">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <circle cx="12" cy="12" r="9"/>
-                                            <circle cx="12" cy="12" r="4" fill="currentColor"/>
-                                        </svg>
-                                    </span>
-                                    <span>Radio</span>
-                                </button>
-                                <button class="field-type-btn" data-type="checkbox">
-                                    <span class="field-type-icon">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <rect x="3" y="3" width="18" height="18" rx="2"/>
-                                            <path d="M9 12l2 2 4-4"/>
-                                        </svg>
-                                    </span>
-                                    <span>Checkbox</span>
-                                </button>
-                                <button class="field-type-btn" data-type="textarea">
-                                    <span class="field-type-icon">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <rect x="3" y="3" width="18" height="18" rx="2"/>
-                                            <path d="M7 7h10M7 12h10M7 17h7"/>
-                                        </svg>
-                                    </span>
-                                    <span>Textarea</span>
-                                </button>
-                                <button class="field-type-btn" data-type="consent">
-                                    <span class="field-type-icon">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                            <path d="M9 12l2 2 4-4" stroke-width="2.5"/>
-                                        </svg>
-                                    </span>
-                                    <span>Consent</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Right Panel: Field Properties -->
-                    <div class="form-builder-properties">
-                        <h3>Field Properties</h3>
-                        <div class="properties-content" id="fieldProperties">
-                            <div class="empty-properties">
-                                <p>Select a field to edit its properties</p>
-                            </div>
-                        </div>
+                <!-- Add field bar -->
+                <div class="fb-add-bar">
+                    <button class="btn btn-secondary btn-sm" id="addFieldBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        Add Field
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="fb-add-arrow">
+                            <path d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </button>
+                    <span class="fb-field-count" id="fbFieldCount"></span>
+                </div>
+
+                <!-- Inline field type dropdown (hidden by default) -->
+                <div class="fb-add-dropdown" id="fieldTypeSelector" style="display: none;">
+                    <div class="field-type-grid">
+                        <button class="field-type-btn" data-type="text">
+                            <span class="field-type-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 12h10M12 7v10M5 3h14M10 3v18M14 3v18M5 21h14"/></svg></span>
+                            <span>Text</span>
+                        </button>
+                        <button class="field-type-btn" data-type="email">
+                            <span class="field-type-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 5L2 7"/></svg></span>
+                            <span>Email</span>
+                        </button>
+                        <button class="field-type-btn" data-type="tel">
+                            <span class="field-type-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg></span>
+                            <span>Phone</span>
+                        </button>
+                        <button class="field-type-btn" data-type="number">
+                            <span class="field-type-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2v20M18 2v20M2 12h4M18 12h4M9 7h6M9 17h6"/></svg></span>
+                            <span>Number</span>
+                        </button>
+                        <button class="field-type-btn" data-type="date">
+                            <span class="field-type-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+                            <span>Date</span>
+                        </button>
+                        <button class="field-type-btn" data-type="select">
+                            <span class="field-type-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/><path d="M17 9l3 3-3 3"/></svg></span>
+                            <span>Dropdown</span>
+                        </button>
+                        <button class="field-type-btn" data-type="radio">
+                            <span class="field-type-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg></span>
+                            <span>Radio</span>
+                        </button>
+                        <button class="field-type-btn" data-type="checkbox">
+                            <span class="field-type-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg></span>
+                            <span>Checkbox</span>
+                        </button>
+                        <button class="field-type-btn" data-type="textarea">
+                            <span class="field-type-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h10M7 12h10M7 17h7"/></svg></span>
+                            <span>Textarea</span>
+                        </button>
+                        <button class="field-type-btn" data-type="consent">
+                            <span class="field-type-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/><path d="M9 12l2 2 4-4" stroke-width="2.5"/></svg></span>
+                            <span>Consent</span>
+                        </button>
                     </div>
                 </div>
-                
-                <!-- Form Templates -->
-                <div class="form-templates">
-                    <h4>Quick Start Templates</h4>
-                    <div class="template-buttons">
-                        <button class="template-btn" data-template="basic">Basic Contact</button>
-                        <button class="template-btn" data-template="event">Event Registration</button>
-                        <button class="template-btn" data-template="inquiry">Program Inquiry</button>
-                        <button class="template-btn" data-template="newsletter">Newsletter Signup</button>
+
+                <!-- Scrollable field list -->
+                <div class="fb-fields-list" id="formFieldsList">
+                    <!-- Fields rendered dynamically -->
+                </div>
+            </div>
+
+            <div class="form-builder-footer">
+                <div class="fb-templates">
+                    <span class="fb-templates-label">Templates:</span>
+                    <button class="template-btn" data-template="basic">Basic</button>
+                    <button class="template-btn" data-template="event">Event</button>
+                    <button class="template-btn" data-template="inquiry">Inquiry</button>
+                    <button class="template-btn" data-template="newsletter">Newsletter</button>
+                </div>
+                <div class="fb-actions">
+                    <button class="btn btn-secondary" id="cancelFormBuilder">Cancel</button>
+                    <button class="btn btn-primary" id="saveFormBuilder">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Upload Modal -->
+    <div class="modal-backdrop" id="imageUploadBackdrop" style="display: none;">
+        <div class="modal-container image-upload-modal">
+            <div class="modal-header">
+                <h2>Upload Image</h2>
+                <button class="modal-close" id="closeImageUpload" aria-label="Close image upload">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="image-preview-area" id="imagePreview">
+                    <img id="imagePreviewImg" style="display:none;" alt="Preview">
+                    <span id="imagePreviewEmpty">No image selected — drop a file here or use the options below</span>
+                </div>
+                <div class="image-upload-methods">
+                    <div class="image-upload-file">
+                        <input type="file" id="imageFileInput" accept="image/*" style="display:none;">
+                        <label for="imageFileInput" class="btn btn-secondary btn-sm">Choose File</label>
+                    </div>
+                    <span class="image-upload-or">or</span>
+                    <div class="image-upload-url">
+                        <input type="text" id="imageUrlInput" placeholder="Paste image URL..." class="image-url-input">
+                        <button class="btn btn-secondary btn-sm" id="imageLoadUrlBtn">Load</button>
                     </div>
                 </div>
             </div>
-            
             <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelFormBuilder">Cancel</button>
-                <button class="btn btn-primary" id="saveFormBuilder">Save Changes</button>
+                <button class="btn btn-secondary" id="imageRemoveBtn" style="margin-right:auto; color:#E53E3E; border-color:#E53E3E;">Remove Image</button>
+                <button class="btn btn-secondary" id="imageCancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="imageSaveBtn">Save</button>
             </div>
         </div>
     </div>

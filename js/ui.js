@@ -4,6 +4,7 @@ import { saveContentFromEditable } from './canvas.js';
 import sectionTemplates from './sections/index.js';
 import { allSections, categories } from './sections/index.js';
 import { addSection } from './canvas.js';
+import { exportImages, importImages } from './image-store.js';
 
 // Generate sidebar HTML from section registry (Phase 5)
 export function generateSidebar(sidebarContent) {
@@ -189,10 +190,11 @@ export function exportJSON() {
     try {
         saveContentFromEditable();
         const exportData = {
-            version: '1.1',
+            version: '1.2',
             created: new Date().toISOString(),
             viewport: state.currentViewport,
-            sections: state.sections
+            sections: state.sections,
+            images: exportImages(state.sections)
         };
 
         const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
@@ -283,6 +285,9 @@ export function handleImport(e, updateCanvasFn) {
                     section.content = {};
                 }
             });
+            if (data.images) {
+                importImages(data.images);
+            }
             state.sections = data.sections;
             updateCanvasFn();
             alert('Wireframe imported successfully!');

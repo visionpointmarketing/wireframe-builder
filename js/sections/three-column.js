@@ -1,4 +1,4 @@
-import { escapeHtml, renderIfVisible, wrapSection } from '../utils.js';
+import { escapeHtml, renderIfVisible, wrapSection, renderImagePlaceholder } from '../utils.js';
 
 export default {
     type: 'three-column',
@@ -45,7 +45,7 @@ export default {
             <div class="three-column-grid">
                 ${data.columns.map((col, i) => `
                     <div class="column-item" data-column-index="${i}">
-                        <div class="column-image">Image Placeholder</div>
+                        ${renderImagePlaceholder('column' + i, data.images, 'column-image', 'Image Placeholder')}
                         <h3 class="column-title editable" contenteditable="true" data-field="column-title-${i}">${col.title}</h3>
                         <p class="column-description editable" contenteditable="true" data-field="column-description-${i}">${col.description}</p>
                     </div>

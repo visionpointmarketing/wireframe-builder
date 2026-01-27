@@ -1,3 +1,5 @@
+import { getImage } from './image-store.js';
+
 // HTML Sanitization utility
 export const sanitizeHTML = (str) => {
     const temp = document.createElement('div');
@@ -28,6 +30,27 @@ export function renderIfVisible(field, html, visibility) {
         return html;
     }
     return '';
+}
+
+// Camera SVG icon for image upload overlay
+const CAMERA_SVG = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+    <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+    <circle cx="12" cy="13" r="4"/>
+</svg>`;
+
+// Render an image placeholder that supports uploaded images
+export function renderImagePlaceholder(imageSlot, images, cssClass, placeholderText) {
+    const imageKey = images && images[imageSlot];
+    const imageData = imageKey ? getImage(imageKey) : null;
+
+    const content = imageData
+        ? `<img class="uploaded-image" src="${imageData}" alt="${placeholderText}">`
+        : placeholderText;
+
+    return `<div class="${cssClass} image-placeholder-wrapper" data-image-slot="${imageSlot}">
+        ${content}
+        <div class="image-upload-overlay">${CAMERA_SVG}</div>
+    </div>`;
 }
 
 // Wrap a section's inner content with the standard drag-handle + section-controls boilerplate
