@@ -2,7 +2,7 @@
 
 A secure, accessible visual wireframe builder designed to bridge the gap between content writers and developers, specifically for higher education landing pages. This tool helps writers understand how their content fits within responsive layouts before development begins.
 
-![Wireframe Builder](https://img.shields.io/badge/version-1.1.2-blue.svg)
+![Wireframe Builder](https://img.shields.io/badge/version-2.0.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Security](https://img.shields.io/badge/security-hardened-green.svg)
 
@@ -19,8 +19,9 @@ Content writers often struggle to visualize how their copy will appear in respon
 ## ✨ Features
 
 ### Section Library
-- **7 Pre-built Section Types**:
+- **8 Pre-built Section Types**:
   - Content + CTA
+  - Image + Content
   - Three-Column Features
   - Statistics/Numbers
   - Program Cards
@@ -46,8 +47,10 @@ Content writers often struggle to visualize how their copy will appear in respon
 - **Undo/Redo**: Full history support with keyboard shortcuts (Ctrl/Cmd+Z)
 - **Sidebar Toggle**: Hide the section library for distraction-free preview
 - **Full-Width Preview**: Sections display edge-to-edge like real landing pages
-- **Export Options**: 
+- **Client Configuration**: Load per-client branding and section defaults via `?client=` query param
+- **Export Options**:
   - High-quality PNG images
+  - Formatted Google Docs
   - JSON data for version control
 - **Security Features**:
   - XSS protection with HTML sanitization
@@ -74,7 +77,7 @@ Content writers often struggle to visualize how their copy will appear in respon
 
 ### System Requirements
 - Modern web browser (Chrome, Firefox, Safari, Edge)
-- No server or database required
+- No server, build step, or database required
 - Works entirely in the browser
 
 ## 📖 Usage Guide
@@ -104,24 +107,58 @@ The tool provides real-time guidance for optimal content length:
 #### Setting up Google Docs Export (One-time setup for developers)
 1. Go to [script.google.com](https://script.google.com)
 2. Create a new project
-3. Copy the Google Apps Script code from the comments in `script.js` (lines 944-1001)
+3. Copy the Google Apps Script code from `updated-google-script.js`
 4. Deploy as Web App:
    - Execute as: Me
    - Who has access: Anyone
 5. Copy the deployment URL's script ID
-6. Replace `YOUR_SCRIPT_ID` in `script.js` line 942 with your actual script ID
+6. Set the `googleAppsScriptUrl` in your client config JSON (e.g., `config/default.json`), or update the fallback in `js/app.js`
 7. The export button will now work for all users without any configuration needed
 
 ### Keyboard Shortcuts
 - `Ctrl/Cmd + Z`: Undo
 - `Ctrl/Cmd + Y` or `Ctrl/Cmd + Shift + Z`: Redo
 
+## ⚙️ Client Configuration
+
+The builder supports per-client configuration via the `?client=` query parameter. This loads a JSON config file from the `config/` directory.
+
+**Example:** `index.html?client=troy` loads `config/troy.json`
+
+### Config File Schema
+
+```json
+{
+  "clientName": "Troy University",
+  "brandStylesheet": "styles/brands/troy.css",
+  "googleAppsScriptUrl": "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec",
+  "docTitlePrefix": "Troy -",
+  "enabledSections": ["content-cta", "image-content", "three-column", "lead-form"],
+  "defaultContent": {
+    "content-cta": {
+      "headline": "Your Future Starts Here"
+    }
+  }
+}
+```
+
+| Field | Description |
+|-------|-------------|
+| `clientName` | Display name shown in the UI |
+| `brandStylesheet` | Path to a brand-specific CSS override file |
+| `googleAppsScriptUrl` | Google Apps Script deployment URL for Docs export |
+| `docTitlePrefix` | Prefix added to exported Google Doc titles |
+| `enabledSections` | Array of section type keys to show (omit to show all) |
+| `defaultContent` | Per-section default field values |
+
+If no `?client=` param is provided, `config/default.json` is loaded.
+
 ## 🛠️ Technical Details
 
 ### Technologies Used
 - **HTML5**: Semantic markup with ARIA labels for accessibility
-- **CSS3**: Modern layouts with CSS Grid and Flexbox
-- **JavaScript**: Vanilla JS with security-first approach
+- **CSS3**: Modern layouts with CSS Grid and Flexbox, layered via `@import`
+- **JavaScript**: Vanilla JS ES modules — no build step, no framework
 - **html2canvas**: For high-quality image exports (loaded with SRI hash)
 
 ### Security & Accessibility
@@ -136,15 +173,85 @@ The tool provides real-time guidance for optimal content length:
 - Safari (latest)
 - Edge (latest)
 
+## 🏗️ Architecture
+
+The codebase uses **ES modules** with no build step. The `index.html` entry point loads `js/app.js` as a module.
+
+### Section Registry Pattern
+Each section is a self-contained module in `js/sections/` that exports:
+- `type` — unique key (e.g., `"image-content"`)
+- `name` — display name for the sidebar
+- `category` — sidebar grouping (e.g., `"Content"`, `"Social Proof"`)
+- `defaults` — default field values
+- `fields` — field metadata (used for character counters, writing guidelines)
+- `render(data)` — returns HTML string for the canvas
+- `toDocFormat(data)` — returns structured data for Google Docs export
+
+The registry (`js/sections/index.js`) imports all section modules and groups them by category. The sidebar, exporter, visibility toggles, and writing guidelines all consume the registry automatically.
+
+### Key Utilities
+- `wrapSection()` in `js/utils.js` — wraps every section's rendered HTML with drag handles, controls (duplicate, delete, visibility), and theme attributes
+- `renderIfVisible()` — conditionally renders sections based on visibility state
+
 ### File Structure
 ```
 wireframe-builder/
-├── index.html          # Main application file with SRI-protected dependencies
-├── styles.css          # All styling with accessibility considerations
-├── script.js           # Secure application logic with XSS protection
-├── README.md           # Documentation
-└── favicon.svg         # Site favicon
+├── index.html                  # Main app shell (ES module entry point)
+├── config/
+│   ├── default.json            # Default client config
+│   └── troy.json               # Troy University config example
+├── js/
+│   ├── app.js                  # Entry point, config loading, initialization
+│   ├── state.js                # State object, history, undo/redo
+│   ├── utils.js                # escapeHtml, renderIfVisible, wrapSection
+│   ├── canvas.js               # Canvas rendering, event delegation, drag-and-drop
+│   ├── ui.js                   # Sidebar generation, viewport, export dropdown
+│   ├── google-docs-exporter.js # Google Docs export (uses section toDocFormat)
+│   ├── form-builder.js         # Lead form field customization modal
+│   ├── writing-guidelines.js   # Guidance panel (reads from section field metadata)
+│   └── sections/
+│       ├── index.js            # Registry: imports all templates, exports by type
+│       ├── content-cta.js
+│       ├── image-content.js
+│       ├── three-column.js
+│       ├── statistics.js
+│       ├── program-cards.js
+│       ├── lead-form.js
+│       ├── testimonial-single.js
+│       └── testimonial-carousel.js
+├── styles/
+│   ├── main.css                # CSS imports (layers)
+│   ├── tokens.css              # Design tokens
+│   ├── ui.css                  # UI component styles
+│   ├── content.css             # Section content styles
+│   └── brands/
+│       ├── default.css         # Default brand tokens
+│       └── troy.css            # Troy University brand overrides
+├── script.js                   # Legacy (no longer loaded, kept for reference)
+├── updated-google-script.js    # Google Apps Script (deployed separately)
+├── favicon.svg
+└── README.md
 ```
+
+## ➕ Adding a New Section
+
+1. Create `js/sections/my-section.js` exporting the unified template structure:
+   ```js
+   export default {
+     type: 'my-section',
+     name: 'My Section',
+     category: 'Content',
+     defaults: { headline: 'Default Headline' },
+     fields: {
+       headline: { label: 'Headline', type: 'text', ideal: 45, max: 70 }
+     },
+     render(data) { /* return HTML string */ },
+     toDocFormat(data) { /* return { type, sections: [...] } */ }
+   };
+   ```
+2. Import and add it to the `templates` array in `js/sections/index.js`
+3. If using a new `category`, add it to the `categories` array in `js/sections/index.js`
+4. Done — the sidebar, exporter, visibility toggles, and writing guidelines all pick it up automatically
 
 ## 🎨 Design System
 
@@ -181,6 +288,16 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 📋 Changelog
 
+### Version 2.0.0 (2025-07-10)
+- 🏗️ Refactored from single-file IIFE to 17 ES module files
+- 📦 Section registry pattern: each section is self-contained (render, export, defaults, field metadata)
+- ⚙️ Client configuration system via `?client=` query parameter
+- 🎨 CSS layered architecture with design tokens and brand overrides
+- 🖼️ Added Image + Content section type
+- 🗂️ Auto-generated sidebar from section registry categories
+- 📤 Google Docs exporter uses per-section `toDocFormat()` methods
+- 📝 Writing guidelines driven by section field metadata
+
 ### Version 1.1.2 (2025-07-09)
 - 🎨 Removed padding from canvas for full-width section preview
 - 📐 Removed border radius from first/last sections for authentic landing page look
@@ -208,5 +325,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Author:** Breon Williams  
+**Author:** Breon Williams
 **Website:** [https://breonwilliams.com](https://breonwilliams.com)

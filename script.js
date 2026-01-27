@@ -159,7 +159,7 @@
                             <div class="three-column-grid">
                                 ${data.columns.map((col, i) => `
                                     <div class="column-item" data-column-index="${i}">
-                                        <div class="column-image">Mountain Graphic</div>
+                                        <div class="column-image">Image Placeholder</div>
                                         <h3 class="column-title editable" contenteditable="true" data-field="column-title-${i}">${col.title}</h3>
                                         <p class="column-description editable" contenteditable="true" data-field="column-description-${i}">${col.description}</p>
                                     </div>
@@ -307,7 +307,7 @@
                             <div class="program-grid">
                                 ${data.programs.map((program, i) => `
                                     <div class="program-card" data-program-index="${i}">
-                                        <div class="program-image">Mountain Graphic</div>
+                                        <div class="program-image">Image Placeholder</div>
                                         <div class="program-content">
                                             <h3 class="program-title editable" contenteditable="true" data-field="program-title-${i}">${program.title}</h3>
                                             <p class="program-description editable" contenteditable="true" data-field="program-description-${i}">${program.description}</p>
@@ -473,7 +473,7 @@
                                     </form>
                                 </div>
                                 <div class="form-image">
-                                    <div class="decorative-graphic">Mountain Graphic</div>
+                                    <div class="decorative-graphic">Image Placeholder</div>
                                 </div>
                             </div>
                         </div>
@@ -680,7 +680,7 @@
                         <div class="section-container">
                             <div class="image-content-grid ${layoutDirection === 'reversed' ? 'reversed' : ''}">
                                 <div class="image-column">
-                                    <div class="content-image">Mountain Graphic</div>
+                                    <div class="content-image">Image Placeholder</div>
                                 </div>
                                 <div class="content-column">
                                     ${renderIfVisible('eyebrow', `<div class="eyebrow editable" contenteditable="true" data-field="eyebrow">${data.eyebrow}</div>`, visibility)}
