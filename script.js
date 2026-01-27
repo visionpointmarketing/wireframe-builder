@@ -2823,7 +2823,7 @@
         if (guideline?.maxChars) {
             const length = element.textContent.trim().length;
             if (length > guideline.maxChars) {
-                element.style.borderColor = 'var(--primary-red)';
+                element.style.borderColor = 'var(--color-brand-primary)';
             } else if (length > guideline.idealChars) {
                 element.style.borderColor = '#F59E0B';
             } else {

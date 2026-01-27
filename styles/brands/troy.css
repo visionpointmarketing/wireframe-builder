@@ -1,0 +1,14 @@
+/* ==========================================================================
+   Brand: Troy University (Burgundy / Silver)
+   ========================================================================== */
+:root {
+    --color-brand-primary: #73000A;
+    --color-brand-primary-dark: #5A0008;
+    --color-brand-primary-light: #A3333D;
+    --color-brand-secondary: #1A365D;
+    --font-heading: 'Montserrat', sans-serif;
+
+    /* Accent alpha variants (derived from brand-primary) */
+    --ui-accent-alpha-10: rgba(115, 0, 10, 0.1);
+    --ui-accent-alpha-05: rgba(115, 0, 10, 0.05);
+}
