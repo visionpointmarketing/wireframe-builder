@@ -6,33 +6,8 @@ function doGet(e) {
               throw new Error('No data provided');
           }
 
-          // Decode the data with multiple fallback strategies
-          let jsonString;
-          
-          try {
-              // Try as standard base64 first (most common)
-              jsonString = Utilities.newBlob(Utilities.base64Decode(encodedData)).getDataAsString();
-              // Test if it's valid JSON
-              JSON.parse(jsonString);
-          } catch (base64Error) {
-              try {
-                  // Try as URL encoded string
-                  jsonString = decodeURIComponent(encodedData);
-                  // Test if it's valid JSON
-                  JSON.parse(jsonString);
-              } catch (urlError) {
-                  try {
-                      // Try as base64 of URL encoded string
-                      const decoded = Utilities.newBlob(Utilities.base64Decode(encodedData)).getDataAsString();
-                      jsonString = decodeURIComponent(decoded);
-                      // Test if it's valid JSON
-                      JSON.parse(jsonString);
-                  } catch (complexError) {
-                      throw new Error('Unable to decode data. Please try exporting again.');
-                  }
-              }
-          }
-          
+          // Decode the data
+          const jsonString = decodeURIComponent(Utilities.newBlob(Utilities.base64Decode(encodedData)).getDataAsString());
           const data = JSON.parse(jsonString);
 
           // Create the document
