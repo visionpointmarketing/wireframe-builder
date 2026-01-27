@@ -1,13 +1,13 @@
 {
-    "clientName": "Troy University",
+    "clientName": "TROY University",
     "brandStylesheet": "styles/brands/troy.css",
     "googleAppsScriptUrl": "https://script.google.com/a/macros/visionpointmarketing.com/s/AKfycbxfYTH9X-jQkI0Pq8p75U7g6avUSDZz9EOUovQm69xH0JRDD2Uc8zx9sAH7JH7UzIRl/exec",
-    "docTitlePrefix": "Troy Landing Page Wireframe",
+    "docTitlePrefix": "TROY Landing Page Wireframe",
     "enabledSections": ["content-cta", "three-column", "statistics", "program-cards", "lead-form", "testimonial-single", "testimonial-carousel", "image-content"],
     "defaultContent": {
         "content-cta": {
-            "eyebrow": "Why Troy",
-            "title": "Your Future Starts at Troy"
+            "eyebrow": "Why TROY",
+            "title": "Your Future Starts at TROY"
         }
     }
 }

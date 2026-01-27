@@ -2,6 +2,7 @@
 export const state = {
     sections: [],
     currentViewport: 'desktop',
+    activePreset: 'default',
     history: [],
     historyIndex: -1,
     maxHistorySize: 50

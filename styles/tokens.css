@@ -12,6 +12,8 @@
     --color-brand-primary-dark: #C53030;
     --color-brand-primary-light: #FC8181;
     --color-brand-secondary: #1A365D;
+    --color-brand-accent: #F6AD55;
+    --color-brand-surface: #F7FAFC;
 
     /* Neutral scale */
     --color-neutral-50: #F7FAFC;
@@ -28,6 +30,7 @@
     /* Typography */
     --font-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-heading: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
     --font-size-xs: 0.75rem;
     --font-size-sm: 0.8125rem;
@@ -85,6 +88,7 @@
 
     /* Content — light mode */
     --content-light-bg: white;
+    --content-light-surface: var(--color-brand-surface);
     --content-light-text: var(--color-neutral-900);
     --content-light-text-secondary: var(--color-neutral-600);
     --content-light-accent: var(--color-brand-primary);

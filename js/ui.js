@@ -5,6 +5,7 @@ import sectionTemplates from './sections/index.js';
 import { allSections, categories } from './sections/index.js';
 import { addSection } from './canvas.js';
 import { exportImages, importImages } from './image-store.js';
+import { brandPresets } from './brand-presets.js';
 
 // Generate sidebar HTML from section registry (Phase 5)
 export function generateSidebar(sidebarContent) {
@@ -31,6 +32,60 @@ export function generateSidebar(sidebarContent) {
             </div>
         `;
     }).join('');
+}
+
+function renderSwatches(colors, cls = '') {
+    return colors.map(c => `<span class="brand-swatch ${cls}" style="background:${c}"></span>`).join('');
+}
+
+export function populateBrandPicker(activePresetId) {
+    const swatchesEl = document.getElementById('brandPickerSwatches');
+    const labelEl = document.getElementById('brandPickerLabel');
+    const menuEl = document.getElementById('brandPickerMenu');
+    if (!swatchesEl || !labelEl || !menuEl) return;
+
+    const active = brandPresets.find(p => p.id === activePresetId) || brandPresets[0];
+    swatchesEl.innerHTML = renderSwatches(active.colors);
+    labelEl.textContent = active.name;
+
+    menuEl.innerHTML = brandPresets.map(p => `
+        <button class="brand-picker-item${p.id === activePresetId ? ' active' : ''}" data-preset="${p.id}">
+            <span class="brand-swatches">${renderSwatches(p.colors)}</span>
+            <span class="brand-picker-item-name">${p.name}</span>
+            ${p.id === activePresetId ? '<svg class="brand-picker-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>' : ''}
+        </button>
+    `).join('');
+}
+
+export function setupBrandPicker(switchPresetFn) {
+    const btn = document.getElementById('brandPickerBtn');
+    const menu = document.getElementById('brandPickerMenu');
+    if (!btn || !menu) return;
+
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // Close export menu if open
+        document.getElementById('exportMenu')?.classList.remove('show');
+        menu.classList.toggle('show');
+    });
+
+    menu.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const item = e.target.closest('.brand-picker-item');
+        if (!item) return;
+        const presetId = item.dataset.preset;
+        menu.classList.remove('show');
+        // Always call switch even for same preset to ensure clean state
+        switchPresetFn(presetId).then(() => {
+            populateBrandPicker(presetId);
+        });
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.brand-picker')) {
+            menu.classList.remove('show');
+        }
+    });
 }
 
 export function setupSidebarEnhancements() {
@@ -88,6 +143,8 @@ export function setupExportDropdown(exportAsImageFn, exportJSONFn, googleDocsExp
 
     exportDropdownBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        // Close brand picker if open
+        document.getElementById('brandPickerMenu')?.classList.remove('show');
         exportMenu.classList.toggle('show');
     });
 
@@ -193,6 +250,7 @@ export function exportJSON() {
             version: '1.2',
             created: new Date().toISOString(),
             viewport: state.currentViewport,
+            activePreset: state.activePreset,
             sections: state.sections,
             images: exportImages(state.sections)
         };
@@ -289,6 +347,15 @@ export function handleImport(e, updateCanvasFn) {
                 importImages(data.images);
             }
             state.sections = data.sections;
+            if (data.activePreset) {
+                const preset = brandPresets.find(p => p.id === data.activePreset);
+                if (preset) {
+                    state.activePreset = data.activePreset;
+                    const link = document.getElementById('brandStylesheet');
+                    if (link) link.href = preset.stylesheet;
+                    populateBrandPicker(data.activePreset);
+                }
+            }
             updateCanvasFn();
             alert('Wireframe imported successfully!');
         } catch (error) {

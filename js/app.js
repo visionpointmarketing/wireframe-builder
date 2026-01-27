@@ -4,36 +4,77 @@ import { FormBuilder } from './form-builder.js';
 import { ImageUploadModal } from './image-upload-modal.js';
 import { GoogleDocsExporter } from './google-docs-exporter.js';
 import { initializeGuidance } from './writing-guidelines.js';
-import { generateSidebar, setupSidebarEnhancements, setupExportDropdown, setupEventListeners, exportJSON, exportAsImage, handleImport } from './ui.js';
+import { generateSidebar, populateBrandPicker, setupBrandPicker, setupSidebarEnhancements, setupExportDropdown, setupEventListeners, exportJSON, exportAsImage, handleImport } from './ui.js';
 import sectionTemplates from './sections/index.js';
+import { brandPresets } from './brand-presets.js';
 
 // Client configuration system (Phase 4)
 async function loadConfig() {
     const params = new URLSearchParams(window.location.search);
     const clientName = params.get('client');
 
-    if (!clientName) return null;
+    if (!clientName) return { clientName: null, config: null };
 
     try {
         const response = await fetch(`config/${clientName}.json`);
-        if (!response.ok) return null;
-        return await response.json();
+        if (!response.ok) return { clientName, config: null };
+        return { clientName, config: await response.json() };
     } catch {
         console.warn(`Could not load config for client: ${clientName}`);
-        return null;
+        return { clientName, config: null };
     }
+}
+
+// Saved at startup before any config mutates them
+let originalDefaults = {};
+
+async function switchPreset(presetId) {
+    const preset = brandPresets.find(p => p.id === presetId);
+    if (!preset) return;
+
+    state.activePreset = presetId;
+
+    // Swap brand stylesheet
+    const link = document.getElementById('brandStylesheet');
+    if (link) {
+        link.href = preset.stylesheet;
+    }
+
+    // Load and apply config if preset has one
+    if (preset.config) {
+        try {
+            const response = await fetch(preset.config);
+            if (response.ok) {
+                const config = await response.json();
+                applyConfig(config);
+            }
+        } catch {
+            // Config load is optional
+        }
+    } else {
+        // Reset to defaults: show all sections, clear client name
+        document.querySelectorAll('.section-btn').forEach(btn => btn.style.display = '');
+        document.querySelectorAll('.component-category').forEach(cat => cat.style.display = '');
+        document.querySelector('.app-header h1').textContent = 'Landing Page Wireframe Builder';
+        document.title = 'Landing Page Wireframe Builder';
+
+        // Restore original section defaults
+        for (const [type, orig] of Object.entries(originalDefaults)) {
+            const tmpl = sectionTemplates[type];
+            if (tmpl && tmpl.defaults) {
+                Object.assign(tmpl.defaults, JSON.parse(JSON.stringify(orig)));
+            }
+        }
+    }
+
+    updateCanvas(false);
 }
 
 function applyConfig(config) {
     if (!config) return;
 
-    // Load brand stylesheet
-    if (config.brandStylesheet) {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = config.brandStylesheet;
-        document.head.appendChild(link);
-    }
+    // Brand stylesheet is handled by switchPreset via #brandStylesheet link.
+    // No need to append a new <link> here.
 
     // Update page title
     if (config.clientName) {
@@ -89,8 +130,31 @@ document.addEventListener('DOMContentLoaded', async () => {
         generateSidebar(sectionLibrary);
     }
 
+    // Save original section defaults before any config mutates them
+    for (const [type, tmpl] of Object.entries(sectionTemplates)) {
+        if (tmpl.defaults) {
+            originalDefaults[type] = JSON.parse(JSON.stringify(tmpl.defaults));
+        }
+    }
+
     // Load client config (Phase 4)
-    const config = await loadConfig();
+    const { clientName, config } = await loadConfig();
+
+    // Determine initial preset from ?client= param
+    const initialPreset = clientName && brandPresets.find(p => p.id === clientName)
+        ? clientName : 'default';
+    state.activePreset = initialPreset;
+
+    // Set brand stylesheet to match preset
+    const brandLink = document.getElementById('brandStylesheet');
+    const presetDef = brandPresets.find(p => p.id === initialPreset);
+    if (brandLink && presetDef) {
+        brandLink.href = presetDef.stylesheet;
+    }
+
+    // Populate and wire up brand picker
+    populateBrandPicker(initialPreset);
+    setupBrandPicker(switchPreset);
 
     // Initialize state refs
     initStateRefs(undoBtn, redoBtn, updateCanvas);

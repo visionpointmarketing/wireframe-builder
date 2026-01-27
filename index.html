@@ -6,7 +6,7 @@
     <title>Landing Page Wireframe Builder</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/brands/default.css">
+    <link rel="stylesheet" href="styles/brands/default.css" id="brandStylesheet">
 </head>
 <body>
     <div class="app-container">
@@ -49,6 +49,19 @@
             </div>
             
             <div class="header-actions">
+                <div class="brand-picker" id="brandPicker">
+                    <button class="brand-picker-trigger" id="brandPickerBtn" title="Brand Preset">
+                        <span class="brand-swatches" id="brandPickerSwatches"></span>
+                        <span class="brand-picker-label" id="brandPickerLabel">Default</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="dropdown-arrow">
+                            <path d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </button>
+                    <div class="brand-picker-menu" id="brandPickerMenu"></div>
+                </div>
+
+                <div class="header-separator"></div>
+
                 <div class="action-group">
                     <button id="undoBtn" class="btn btn-icon" disabled title="Undo (⌘Z)">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

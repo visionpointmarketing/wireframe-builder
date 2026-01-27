@@ -1,14 +1,17 @@
 /* ==========================================================================
-   Brand: Troy University (Burgundy / Silver)
+   Brand: Troy University (Cardinal / Black / Wheat / Sand)
    ========================================================================== */
 :root {
-    --color-brand-primary: #73000A;
-    --color-brand-primary-dark: #5A0008;
+    --color-brand-primary: #910039;
+    --color-brand-primary-dark: #720724;
     --color-brand-primary-light: #A3333D;
-    --color-brand-secondary: #1A365D;
-    --font-heading: 'Montserrat', sans-serif;
+    --color-brand-secondary: #231F20;
+    --color-brand-accent: #efd19f;
+    --color-brand-surface: #f1efe3;
+    --font-heading: 'Open Sans', sans-serif;
+    --font-body: 'Open Sans', sans-serif;
 
     /* Accent alpha variants (derived from brand-primary) */
-    --ui-accent-alpha-10: rgba(115, 0, 10, 0.1);
-    --ui-accent-alpha-05: rgba(115, 0, 10, 0.05);
+    --ui-accent-alpha-10: rgba(145, 0, 57, 0.1);
+    --ui-accent-alpha-05: rgba(145, 0, 57, 0.05);
 }
