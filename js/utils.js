@@ -53,6 +53,26 @@ export function renderImagePlaceholder(imageSlot, images, cssClass, placeholderT
     </div>`;
 }
 
+// WCAG 2.1 contrast ratio utilities
+function luminance(hex) {
+    const rgb = [hex.slice(1,3), hex.slice(3,5), hex.slice(5,7)]
+        .map(h => parseInt(h, 16) / 255)
+        .map(c => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+    return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+}
+
+export function getContrastRatio(hex1, hex2) {
+    const l1 = luminance(hex1);
+    const l2 = luminance(hex2);
+    const lighter = Math.max(l1, l2);
+    const darker = Math.min(l1, l2);
+    return (lighter + 0.05) / (darker + 0.05);
+}
+
+export function filterAccessibleColors(colors, textColor, minRatio = 4.5) {
+    return colors.filter(c => getContrastRatio(c, textColor) >= minRatio);
+}
+
 // Wrap a section's inner content with the standard drag-handle + section-controls boilerplate
 export function wrapSection(type, variant, innerHtml, extraControls = '') {
     return `

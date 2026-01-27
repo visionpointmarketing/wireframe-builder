@@ -20,7 +20,8 @@ A browser-based visual wireframe builder for higher education landing pages. Van
 |------|------|
 | `js/app.js` | Entry point — loads config, initializes state, sets up event listeners |
 | `js/state.js` | State object, section array, history stack, undo/redo |
-| `js/utils.js` | `escapeHtml`, `renderIfVisible`, `wrapSection` |
+| `js/utils.js` | `escapeHtml`, `renderIfVisible`, `wrapSection`, `getContrastRatio`, `filterAccessibleColors` |
+| `js/brand-presets.js` | Brand color presets and WCAG-filtered background color options |
 | `js/canvas.js` | Canvas rendering, inline editing, event delegation, drag-and-drop reordering |
 | `js/ui.js` | Sidebar generation, viewport toggle, export dropdown, theme toggle |
 | `js/google-docs-exporter.js` | Google Docs export via Apps Script |
@@ -85,3 +86,8 @@ CSS uses `@layer` for specificity control. Brand overrides only change token val
 - [ ] Writing guidelines panel shows correct limits per field
 - [ ] `?client=troy` loads Troy branding and config
 - [ ] Responsive preview (desktop/tablet/mobile) works
+- [ ] Background color picker shows accessible swatches per section variant
+- [ ] Selecting a swatch updates section background immediately
+- [ ] Changing section variant resets background color
+- [ ] Brand preset reset restores default backgrounds
+- [ ] Background color selections round-trip through JSON export/import

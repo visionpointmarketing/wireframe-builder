@@ -2,6 +2,8 @@ import { state } from './state.js';
 import { saveToHistory } from './state.js';
 import sectionTemplates from './sections/index.js';
 import { gc } from './image-store.js';
+import { filterAccessibleColors } from './utils.js';
+import { brandPresets } from './brand-presets.js';
 
 let canvasEl = null;
 let formBuilderRef = null;
@@ -72,7 +74,12 @@ export function updateCanvas(saveHistory = true) {
     const wireframeHtml = state.sections.map(section => {
         const template = sectionTemplates[section.type];
         const visibility = section.visibility || getDefaultVisibility(section.type);
-        return template ? template.render(section.variant, section.content, section.layoutDirection, visibility) : '';
+        if (!template) return '';
+        let html = template.render(section.variant, section.content, section.layoutDirection, visibility);
+        if (section.bgColor) {
+            html = html.replace('data-section-type=', `style="--s-bg: ${section.bgColor}" data-section-type=`);
+        }
+        return html;
     }).join('');
 
     canvasEl.innerHTML = `<div class="wireframe-container">${wireframeHtml}</div>`;
@@ -175,6 +182,7 @@ export const eventHandlers = {
         const index = Array.from(canvasEl.querySelectorAll('.section')).indexOf(section);
         if (state.sections[index]) {
             state.sections[index].variant = state.sections[index].variant === 'light' ? 'dark' : 'light';
+            state.sections[index].bgColor = null;
             updateCanvas();
         }
     },
@@ -225,7 +233,23 @@ export const eventHandlers = {
                 }
             });
 
+            // Build background color swatches
+            const textColor = sectionData.variant === 'dark' ? '#FFFFFF' : '#1A202C';
+            const neutrals = ['#F7FAFC','#EDF2F7','#E2E8F0','#CBD5E0','#A0AEC0','#718096','#4A5568','#2D3748','#1A202C'];
+            const preset = brandPresets.find(p => p.id === (state.activePreset || 'default')) || brandPresets[0];
+            const candidates = ['#FFFFFF', ...preset.colors, ...neutrals];
+            const unique = [...new Set(candidates.map(c => c.toUpperCase()))];
+            const accessible = filterAccessibleColors(unique, textColor);
+
+            let swatchesHtml = `<button class="bg-swatch bg-swatch-default ${!sectionData.bgColor ? 'active' : ''}" data-bg="" title="Default"></button>`;
+            accessible.forEach(color => {
+                const isActive = sectionData.bgColor && sectionData.bgColor.toUpperCase() === color.toUpperCase();
+                swatchesHtml += `<button class="bg-swatch ${isActive ? 'active' : ''}" data-bg="${color}" style="background:${color}" title="${color}"></button>`;
+            });
+
             popover.innerHTML = `
+                <div class="visibility-popover-header">Background Color</div>
+                <div class="bg-color-swatches">${swatchesHtml}</div>
                 <div class="visibility-popover-header">Show/Hide Elements</div>
                 <div class="visibility-options">${optionsHtml}</div>
                 <div class="visibility-actions">
@@ -235,6 +259,16 @@ export const eventHandlers = {
             `;
 
             btn.parentElement.appendChild(popover);
+
+            popover.querySelectorAll('.bg-swatch').forEach(swatch => {
+                swatch.addEventListener('click', () => {
+                    const color = swatch.dataset.bg;
+                    state.sections[index].bgColor = color || null;
+                    popover.querySelectorAll('.bg-swatch').forEach(s => s.classList.remove('active'));
+                    swatch.classList.add('active');
+                    updateCanvas();
+                });
+            });
 
             popover.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
                 checkbox.addEventListener('change', (e) => {

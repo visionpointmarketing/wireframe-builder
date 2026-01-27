@@ -836,6 +836,37 @@
     transform: rotate(45deg);
 }
 
+/* --- Background Color Swatches --- */
+.bg-color-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 0 12px;
+}
+
+.bg-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    border: 2px solid var(--ui-border);
+    cursor: pointer;
+    padding: 0;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.bg-swatch:hover {
+    border-color: var(--color-neutral-500);
+}
+
+.bg-swatch.active {
+    border-color: var(--ui-accent);
+    box-shadow: 0 0 0 2px var(--ui-accent);
+}
+
+.bg-swatch-default {
+    background: repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%) 50% / 8px 8px;
+}
+
 .visibility-popover-header {
     font-size: var(--font-size-base);
     font-weight: var(--font-weight-semibold);

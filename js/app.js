@@ -34,6 +34,9 @@ async function switchPreset(presetId) {
 
     state.activePreset = presetId;
 
+    // Reset custom background colors (palette changed)
+    state.sections.forEach(s => { s.bgColor = null; });
+
     // Swap brand stylesheet
     const link = document.getElementById('brandStylesheet');
     if (link) {

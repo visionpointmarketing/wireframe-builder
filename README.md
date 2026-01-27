@@ -47,6 +47,7 @@ Content writers often struggle to visualize how their copy will appear in respon
 - **Undo/Redo**: Full history support with keyboard shortcuts (Ctrl/Cmd+Z)
 - **Sidebar Toggle**: Hide the section library for distraction-free preview
 - **Full-Width Preview**: Sections display edge-to-edge like real landing pages
+- **Per-Section Background Color**: Choose from WCAG AA–filtered color swatches that adapt to each section's variant
 - **Client Configuration**: Load per-client branding and section defaults via `?client=` query param
 - **Export Options**:
   - High-quality PNG images
@@ -208,6 +209,7 @@ wireframe-builder/
 │   ├── ui.js                   # Sidebar generation, viewport, export dropdown
 │   ├── google-docs-exporter.js # Google Docs export (uses section toDocFormat)
 │   ├── form-builder.js         # Lead form field customization modal
+│   ├── brand-presets.js         # Brand color presets and WCAG-filtered background options
 │   ├── writing-guidelines.js   # Guidance panel (reads from section field metadata)
 │   └── sections/
 │       ├── index.js            # Registry: imports all templates, exports by type
@@ -287,6 +289,12 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Security hardening and accessibility improvements in v1.1.0
 
 ## 📋 Changelog
+
+### Version 2.1.0 (2025-07-11)
+- 🎨 Per-section background color picker with WCAG AA contrast filtering
+- 🏷️ Brand color presets system (`js/brand-presets.js`)
+- ♿ Accessible color swatches adapt to each section's dark/light variant
+- 🔄 Background color resets on variant change; persists through JSON export/import
 
 ### Version 2.0.0 (2025-07-10)
 - 🏗️ Refactored from single-file IIFE to 17 ES module files
